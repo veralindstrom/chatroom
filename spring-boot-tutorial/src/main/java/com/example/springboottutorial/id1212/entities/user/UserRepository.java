@@ -1,4 +1,4 @@
-package com.example.springboottutorial.id1212.user;
+package com.example.springboottutorial.id1212.entities.user;
 
 import org.springframework.data.repository.CrudRepository;
 

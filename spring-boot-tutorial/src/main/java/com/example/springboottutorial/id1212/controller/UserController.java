@@ -1,7 +1,7 @@
 package com.example.springboottutorial.id1212.controller;
 
-import com.example.springboottutorial.id1212.user.User;
-import com.example.springboottutorial.id1212.user.UserRepository;
+import com.example.springboottutorial.id1212.entities.user.User;
+import com.example.springboottutorial.id1212.entities.user.UserRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +20,7 @@ public class UserController {
         user = userRepository.findUserByEmailAndPassword(email, password);
         if(user != null){
             model.addAttribute("user", user);
-            return "home";
+            return "chat";
         }
         else {
             String message = "Invalid e-mail/password";
