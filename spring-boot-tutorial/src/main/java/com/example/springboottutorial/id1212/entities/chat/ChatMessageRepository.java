@@ -4,9 +4,9 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.Date;
 
-public interface ChatMessageRepository extends CrudRepository<ChatMessage, String> {
-    ChatMessage findChatMessageByMessage_id(Integer id);
-    ChatMessage findChatMessageByUser_id(Integer id);
+public interface ChatMessageRepository extends CrudRepository<ChatMessage, Integer> {
+    ChatMessage findChatMessageByMessageId(Integer messageId);
+    ChatMessage findChatMessageByUserId(Integer userId);
     ChatMessage findChatMessageByDate(Date date);
-    ChatMessage findChatMessageByChatroom_id(Integer id);
+    ChatMessage findChatMessageByChatroomId(Integer chatroomId);
 }

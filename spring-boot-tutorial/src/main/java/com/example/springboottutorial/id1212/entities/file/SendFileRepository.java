@@ -5,6 +5,6 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.ArrayList;
 
 public interface SendFileRepository extends CrudRepository<SendFile, String> {
-    SendFile findChatFileByFile_id(Integer file_id);
+    SendFile findChatFileByFileId(Integer fileId);
     ArrayList<SendFile> findChatFilesByCategory(String category);
 }

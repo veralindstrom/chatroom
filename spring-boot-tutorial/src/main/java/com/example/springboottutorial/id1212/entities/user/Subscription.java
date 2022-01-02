@@ -4,52 +4,53 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.io.Serializable;
 
 @Entity
-public class Subscription {
+public class Subscription implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer sub_id;
-    private Integer user_id;
-    private Integer chatroom_id;
-    private Integer category_id;
-    private String mail_message;
+    private Integer subId;
+    private Integer userId;
+    private Integer chatroomId;
+    private Integer categoryId;
+    private String mailMessage;
 
-    public Integer getSub_id() { return sub_id; }
+    public Integer getSubId() { return subId; }
 
-    public void setSub_id(Integer sub_id) {
-        this.sub_id = sub_id;
+    public void setsubId(Integer subId) {
+        this.subId = subId;
     }
 
-    public Integer getUser_id() {
-        return user_id;
+    public Integer getuserId() {
+        return userId;
     }
 
-    public void setUser_id(Integer user_id) {
-        this.user_id = user_id;
+    public void setuserId(Integer userId) {
+        this.userId = userId;
     }
 
-    public Integer getChatroom_id() {
-        return chatroom_id;
+    public Integer getchatroomId() {
+        return chatroomId;
     }
 
-    public void setChatroom_id(Integer chatroom_id) {
-        this.chatroom_id = chatroom_id;
+    public void setchatroomId(Integer chatroomId) {
+        this.chatroomId = chatroomId;
     }
 
-    public Integer getCategory_id() {
-        return category_id;
+    public Integer getcategoryId() {
+        return categoryId;
     }
 
-    public void setCategory_id(Integer category_id) {
-        this.category_id = category_id;
+    public void setcategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 
-    public String getMail_message() {
-        return mail_message;
+    public String getmailMessage() {
+        return mailMessage;
     }
 
-    public void setMail_message(String mail_message) {
-        this.mail_message = mail_message;
+    public void setmailMessage(String mailMessage) {
+        this.mailMessage = mailMessage;
     }
 }

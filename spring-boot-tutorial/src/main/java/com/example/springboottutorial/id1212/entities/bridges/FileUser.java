@@ -3,29 +3,29 @@ package com.example.springboottutorial.id1212.entities.bridges;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serializable;
 
 @Entity
 @Table(name="user_file")
-public class FileUser {
+public class FileUser implements Serializable {
     @Id
-    private Integer user_id;
-    @Id
-    private Integer file_id;
+    private Integer userId;
+    private Integer fileId;
 
-    public void setFile_id(Integer file_id) {
-        this.file_id = file_id;
+    public void setFileId(Integer fileId) {
+        this.fileId = fileId;
     }
 
-    public Integer getFile_id() {
-        return file_id;
+    public Integer getFileId() {
+        return fileId;
     }
 
-    public void setUser_id(Integer user_id) {
-        this.user_id = user_id;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
-    public Integer getUser_id() {
-        return user_id;
+    public Integer getUserId() {
+        return userId;
     }
 }
 

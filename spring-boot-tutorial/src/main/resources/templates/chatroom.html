@@ -10,7 +10,22 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
 <body>
-<div class="container">
+
+<div id="username-page">
+    <div class="username-page-container">
+        <h1 class="title">Type your username</h1>
+        <form id="usernameForm" name="usernameForm">
+            <div class="form-group">
+                <input type="text" id="name" th:value="${user.username}" autocomplete="off" class="form-control" />
+            </div>
+            <div class="form-group">
+                <button type="submit" class="accent username-submit">Join Chatroom</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="container hidden">
     <div class="row">
         <div class="chat-header col">
             <h2>Spring WebSocket Chat Demo</h2>

@@ -8,19 +8,19 @@ import java.util.Date;
 public class ChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer message_id;
+    private Integer messageId;
     private String message;
     private Date date;
-    private Integer file_id;
-    private Integer user_id;
-    private Integer chatroom_id;
+    private Integer fileId;
+    private Integer userId;
+    private Integer chatroomId;
 
     public Integer getId() {
-        return message_id;
+        return messageId;
     }
 
-    public void setId(Integer message_id) {
-        this.message_id = message_id;
+    public void setId(Integer messageId) {
+        this.messageId = messageId;
     }
 
     public String getMessage(){
@@ -39,27 +39,27 @@ public class ChatMessage {
         this.date = date;
     }
 
-    public Integer getFile_id(){
-        return file_id;
+    public Integer getfileId(){
+        return fileId;
     }
 
-    public void setFile_id(Integer file_id){
-        this.file_id = file_id;
+    public void setfileId(Integer fileId){
+        this.fileId = fileId;
     }
 
-    public Integer getUser_id(){
-        return user_id;
+    public Integer getuserId(){
+        return userId;
     }
 
-    public void setUser_id(Integer user_id){
-        this.user_id = user_id;
+    public void setuserId(Integer userId){
+        this.userId = userId;
     }
 
-    public Integer getChatroom_id(){
-        return chatroom_id;
+    public Integer getchatroomId(){
+        return chatroomId;
     }
 
-    public void setChatroom_id(Integer chatroom_id){
-        this.chatroom_id = chatroom_id;
+    public void setchatroomId(Integer chatroomId){
+        this.chatroomId = chatroomId;
     }
 }

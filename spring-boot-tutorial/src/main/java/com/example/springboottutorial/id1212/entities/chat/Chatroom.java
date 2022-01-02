@@ -9,17 +9,17 @@ import javax.persistence.Id;
 public class Chatroom {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer chatroom_id;
+    private Integer chatroomId;
     private String name;
-    private Integer user_count;
+    private Integer userCount;
     private boolean status;
 
     public Integer getId() {
-        return chatroom_id;
+        return chatroomId;
     }
 
-    public void setId(Integer chatroom_id) {
-        this.chatroom_id = chatroom_id;
+    public void setId(Integer chatroomId) {
+        this.chatroomId = chatroomId;
     }
 
     public String getName(){
@@ -31,11 +31,11 @@ public class Chatroom {
     }
 
     public Integer getUserCount(){
-        return user_count;
+        return userCount;
     }
 
-    public void addUserCount(Integer user_count){
-        this.user_count += user_count;
+    public void addUserCount(Integer userCount){
+        this.userCount += userCount;
     }
 
     public boolean getStatus(){

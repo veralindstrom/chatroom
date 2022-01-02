@@ -20,7 +20,7 @@ public class UserController {
         user = userRepository.findUserByEmailAndPassword(email, password);
         if(user != null){
             model.addAttribute("user", user);
-            return "chat";
+            return "chatroom";
         }
         else {
             String message = "Invalid e-mail/password";

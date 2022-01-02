@@ -4,7 +4,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.ArrayList;
 
-public interface ChatroomCategoryRepository extends CrudRepository<ChatroomCategory, String> {
-    ChatroomCategory findChatroomCategoryByCategory_idAndChatroom_id(Integer category_id, Integer chatroom_id);
-    ArrayList<ChatroomCategory> findChatroomCategoriesByCategory_id(Integer category_id);
+public interface ChatroomCategoryRepository extends CrudRepository<ChatroomCategory, Integer> {
+    ChatroomCategory findChatroomCategoryByCategoryIdAndChatroomId(Integer categoryId, Integer chatroomId);
+    ArrayList<ChatroomCategory> findChatroomCategoriesByCategoryId(Integer categoryId);
 }

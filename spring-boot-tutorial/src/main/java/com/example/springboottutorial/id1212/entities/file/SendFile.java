@@ -2,22 +2,23 @@ package com.example.springboottutorial.id1212.entities.file;
 
 import javax.persistence.*;
 import java.io.File;
+import java.io.Serializable;
 
 @Entity
 @Table(name="file")
-public class SendFile {
+public class SendFile implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer file_id;
+    private Integer fileId;
     private File file;
     private String category;
 
-    public Integer getFile_id() {
-        return file_id;
+    public Integer getfileId() {
+        return fileId;
     }
 
-    public void setFile_id(Integer file_id) {
-        this.file_id = file_id;
+    public void setfileId(Integer fileId) {
+        this.fileId = fileId;
     }
 
     public File getFile() {
