@@ -1,17 +1,15 @@
 package com.example.springboottutorial.id1212.entities.chat;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
+@Table(name = "chatroom")
 public class Chatroom {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer chatroomId;
     private String name;
-    private Integer userCount;
+    private int userCount;
     private boolean status;
 
     public Integer getId() {
@@ -30,11 +28,11 @@ public class Chatroom {
         this.name = name;
     }
 
-    public Integer getUserCount(){
+    public int getUserCount(){
         return userCount;
     }
 
-    public void addUserCount(Integer userCount){
+    public void addUserCount(int userCount){
         this.userCount += userCount;
     }
 

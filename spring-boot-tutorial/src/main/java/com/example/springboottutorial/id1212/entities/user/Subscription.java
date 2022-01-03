@@ -1,12 +1,10 @@
 package com.example.springboottutorial.id1212.entities.user;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
+@Table(name = "subscription")
 public class Subscription implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
