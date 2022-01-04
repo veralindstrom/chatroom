@@ -7,12 +7,12 @@
 <body>
     <h3>User</h3>
     <h6 th:text="${user.username}"></h6>
-    <form th:action="@{/add-chatroom}" method="GET" style="max-width: 600px; margin: 0 auto";>
+    <form th:action="@{/create-chatroom1}" method="GET" style="max-width: 600px; margin: 0 auto";>
         <label class="col-4 col-form-label"> Create a new chatroom? </label>
         <button type="submit" class="btn">Add</button>
     </form>
 
-    <h6 th:text="${chatrooms}"></h6>
+    <!--h6 th:text="${chatrooms}"></h6>
     <div>
         <ul th:each="chatId: ${chatrooms}">
             <li th:text="${chatId}" />
@@ -22,6 +22,14 @@
     <div>
         <ul th:each="chatname: ${chatnames}">
             <li th:text="${chatname}" />
+        </ul>
+    </div-->
+    <h6> Your Chatrooms </h6>
+    <div>
+        <ul th:each="chatroom: ${chatroom}">
+            <li>
+            <a th:href="@{/chatroom/{id}(id=${chatroom.id})}" th:text="${chatroom.name}"></a>
+            </li>
         </ul>
     </div>
 </body>

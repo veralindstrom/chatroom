@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface ChatroomUserRepository extends CrudRepository<ChatroomUser, Integer> {
-    ArrayList<ChatroomUser> findChatroomUserByUserId(Integer userId);
+    ArrayList<ChatroomUser> findChatroomUsersByUserId(Integer userId);
     ChatroomUser findChatroomUserByUserIdAndChatroomId(Integer userId, Integer chatroomId);
     //ChatroomUser findChatroomUserByAdmin(Boolean admin);
     ChatroomUser findChatroomUserByRoleId(Integer roleId);

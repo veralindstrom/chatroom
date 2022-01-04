@@ -16,32 +16,29 @@
 </head>
 <body>
 <div class="container">
-    <form>
+    <form th:action="@{/create-chatroom1-process}" th:object="${chatroom}"
+          method="post" style="max-width: 600px; margin: 0 auto;">
         <div class="row mb-3">
             <label for="chatroomName" class="col-sm-2 col-form-label">Chatroom Name</label>
             <div class="col-md-6">
-                <input class="form-control" id="chatroomName">
+                <input class="form-control" id="chatroomName" th:field="*{name}">
             </div>
         </div>
         <fieldset class="row mb-3">
             <legend class="col-form-label col-sm-2 pt-0">Category</legend>
             <div class="col-sm-10">
-                <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
-                    <input type="checkbox" class="btn-check" id="btncheck1" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="btncheck1">Category 1</label>
+                <div class="btn-group" role="group" th:each="category, iter: ${categories}" th:object="${object2}" aria-label="Basic checkbox toggle button group">
 
-                    <input type="checkbox" class="btn-check" id="btncheck2" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="btncheck2">Category 2</label>
+                    <input type="checkbox" class="btn-check" th:id="'btncheck' + ${iter.index}" autocomplete="off">
+                    <label class="btn btn-outline-primary" th:for="'btncheck' + ${iter.index}" th:text="${category.category}"></label>
 
-                    <input type="checkbox" class="btn-check" id="btncheck3" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="btncheck3">Category 3</label>
                 </div>
             </div>
         </fieldset>
         <div class="row mb-3">
             <div class="col-sm-10 offset-sm-2">
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="gridCheck1">
+                    <input class="form-check-input" type="checkbox" id="gridCheck1" th:field="*{status}">
                     <label class="form-check-label" for="gridCheck1">
                         Public
                     </label>
