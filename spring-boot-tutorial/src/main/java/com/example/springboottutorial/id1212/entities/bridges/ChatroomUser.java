@@ -40,7 +40,7 @@ public class ChatroomUser {
         return admin;
     }
 
-    public void setStatus(boolean admin){
+    public void setAdmin(boolean admin){
         this.admin = admin;
     }
 

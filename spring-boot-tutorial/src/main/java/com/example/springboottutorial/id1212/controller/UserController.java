@@ -133,7 +133,7 @@ public class UserController {
         ChatroomUser chatroomUser = new ChatroomUser();
         chatroomUser.setChatroomId(chatroom.getId());
         chatroomUser.setUserId(user.getUserId());
-        chatroomUser.setStatus(true);
+        chatroomUser.setAdmin(true);
         chatroomUserRepository.save(chatroomUser);
 
         return "create-chatroom1-success";
