@@ -199,8 +199,6 @@ public class UserController {
                 //model.addAttribute("chatroom", chatroomWithUser);
                 //model.addAttribute("user", user);
                 Chatroom cr = chatroomRepository.findChatRoomByChatroomId(id);
-                Message userMessage = new Message();
-                model.addAttribute("message", userMessage);
                 model.addAttribute("user", user);
                 model.addAttribute("chatroom", cr);
                 model.addAttribute("chatroomId", id);
