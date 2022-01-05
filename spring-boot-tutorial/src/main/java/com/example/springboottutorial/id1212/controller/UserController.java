@@ -1,6 +1,5 @@
 package com.example.springboottutorial.id1212.controller;
 
-import com.example.springboottutorial.Customer;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomUserRepository;
 import com.example.springboottutorial.id1212.entities.category.Category;
@@ -14,7 +13,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Controller
 public class UserController {
@@ -24,8 +22,7 @@ public class UserController {
     private final CategoryRepository categoryRepository;
     private User user;
     private Chatroom chatroom;
-    private ChatroomUser chatroomUser;
-    private ArrayList<ChatroomUser> userChatrooms;
+    private ArrayList<Chatroom> chatrooms;
 
     public UserController(CategoryRepository categoryRepository, UserRepository userRepository, ChatroomUserRepository chatroomUserRepository, ChatroomRepository chatroomRepository) {
         this.userRepository = userRepository;
@@ -36,37 +33,11 @@ public class UserController {
     }
 
     @PostMapping("/home")
-    public String findUser(@RequestParam String email , @RequestParam String password, Model model) {
+    public String findUser(@RequestParam String email, @RequestParam String password, Model model) {
         user = userRepository.findUserByEmailAndPassword(email, password);
-        Integer userId = user.getUserId();
-        ArrayList<ChatroomUser> chatroomuser = chatroomUserRepository.findChatroomUsersByUserId(userId);
-        ArrayList<Chatroom> chatrooms = new ArrayList<>();
-        for(ChatroomUser cu : chatroomuser) {
-            chatrooms.add(chatroomRepository.findChatRoomByChatroomId(cu.getChatroomId()));
-        }
-
-        /*
-        List<Integer> chatroomIds = chatroomUserRepository.getAllChatroomIdsByUserId(userId); // chatroom ids specific to user
-        List<Integer> chatroomIdsAll = chatroomRepository.getAllId(); // all chatroom ids
-        ArrayList<Integer> chatroomIdsforUser = new ArrayList<Integer>();
-        for (Integer chatId : chatroomIdsAll) {
-            chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(userId, chatId);
-            if (chatroomUser != null) {
-                chatroomIdsforUser.add(chatId);
-            }
-        }
-        ArrayList<String> chatroomNamesforUser = new ArrayList<String>();
-        for (Integer chatId : chatroomIds) {
-            Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(chatId);
-            String chatroomName = chatroom.getName();
-            chatroomNamesforUser.add(chatroomName);
-        }
-        */
         if(user != null){
             model.addAttribute("user", user);
-            model.addAttribute("chatroom", chatrooms);
-            //model.addAttribute("chatrooms", chatroomIds);
-            //model.addAttribute("chatnames", chatroomNamesforUser);
+            home(model);
             return "home";
         }
         else {
@@ -80,12 +51,7 @@ public class UserController {
     public String test(Model model) {
         if(user != null){
             model.addAttribute("user", user);
-            ArrayList<ChatroomUser> chatroomuser = chatroomUserRepository.findChatroomUsersByUserId(user.getUserId());
-            ArrayList<Chatroom> chatrooms = new ArrayList<>();
-            for(ChatroomUser cu : chatroomuser) {
-                chatrooms.add(chatroomRepository.findChatRoomByChatroomId(cu.getChatroomId()));
-            }
-            model.addAttribute("chatroom", chatrooms);
+            home(model);
             return "home";
         }
         else {
@@ -95,25 +61,21 @@ public class UserController {
         return "index";
     }
 
-    @GetMapping("/add-chatroom")
-    public String createChatroom(Model model) {
-        chatroom = new Chatroom();
-        model.addAttribute("chatroom", chatroom);
-
-        return "add-chatroom";
+    private void home(Model model) {
+        ArrayList<ChatroomUser> chatroomUser = chatroomUserRepository.findChatroomUsersByUserId(user.getUserId());
+        chatrooms = new ArrayList<>();
+        ArrayList<Chatroom> publicChatrooms = chatroomRepository.getAllPublicId();
+        for(ChatroomUser cu : chatroomUser) {
+            Integer chatId = cu.getChatroomId();
+            Chatroom cr = chatroomRepository.findChatRoomByChatroomId(chatId);
+            chatrooms.add(cr); // / Chatroom the user is part of
+            publicChatrooms.removeAll(chatrooms);
+        }
+        model.addAttribute("chatroom", chatrooms);
+        model.addAttribute("pubchatroom", publicChatrooms);
     }
 
-    @PostMapping("/create-chatroom")
-    public String addChatroom(@RequestParam String name, @RequestParam Boolean status, @RequestParam int userCount) {
-        chatroom.setName(name);
-        chatroom.setStatus(status);
-        //chatroom.setId(1);
-        chatroom.addUserCount(userCount);
-        chatroomRepository.save(chatroom);
-        return "home";
-    }
-
-    @GetMapping("/create-chatroom1")
+    @GetMapping("/create-chatroom")
     public String createChatroom1(Model model) {
         chatroom = new Chatroom();
         Category cat1 = new Category();
@@ -123,10 +85,10 @@ public class UserController {
         model.addAttribute("categories", categories);
         model.addAttribute("chatroom", chatroom);
 
-        return "create-chatroom1";
+        return "create-chatroom";
     }
 
-    @PostMapping("/create-chatroom1-process")
+    @PostMapping("/create-chatroom-process")
     public String processChatroom1(Chatroom chatroom) {
         chatroom.addUserCount(1);
         chatroomRepository.save(chatroom);
@@ -136,18 +98,8 @@ public class UserController {
         chatroomUser.setAdmin(true);
         chatroomUserRepository.save(chatroomUser);
 
-        return "create-chatroom1-success";
+        return "create-chatroom-success";
     }
-
-  /*  @PostMapping("/create-chatroom")
-    public String chatroomRegister(Chatroom chatroom) {
-        // to get from web is all columns in chatroom to create a userChatroom connection
-        // once created the chatroom
-        // create a userChatroom with the logged in user as admin
-        chatroomRepository.save(chatroom);
-
-        return "home";
-    }*/
 
     @GetMapping("/signup")
     public String showRegistrationForm(Model model) {
@@ -166,6 +118,15 @@ public class UserController {
     @GetMapping("/chatroom/{id}")
     public String showChatroom(@PathVariable Integer id, Model model) {
         /*later id is used to set as attribute to show specified chatroom*/
+        Integer userId = user.getUserId();
+        ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(userId, id);
+        if(chatroomUser == null) { // if chatroomUser not exist - user joined new public room
+            chatroomUser = new ChatroomUser();
+            chatroomUser.setChatroomId(id);
+            chatroomUser.setUserId(userId);
+            chatroomUser.setAdmin(false);
+            chatroomUserRepository.save(chatroomUser);
+        }
         model.addAttribute("user", new User());
 
         return "chatroom";
