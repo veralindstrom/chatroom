@@ -1,5 +1,6 @@
 package com.example.springboottutorial.id1212.controller;
 
+import com.example.springboottutorial.id1212.DTO.MessageUserDTO;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomCategory.ChatroomCategory;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomCategory.ChatroomCategoryRepository;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser.ChatroomUser;
@@ -25,7 +26,8 @@ public class UserController {
     private final ChatroomRepository chatroomRepository;
     private final CategoryRepository categoryRepository;
     private final ChatroomCategoryRepository chatroomCategoryRepository;
-   // private MessageRepository messageRepository;
+    private MessageRepository messageRepository;
+    private MessageUserDTO messageUserDTO;
     //private ChatController chatController;
     private User user;
     private ChatroomCategory chatroomCategory;
@@ -38,8 +40,7 @@ public class UserController {
         this.chatroomRepository = chatroomRepository;
         this.categoryRepository = categoryRepository;
         this.chatroomCategoryRepository = chatroomCategoryRepository;
-        //this.messageRepository = messageRepository;
-        //this.chatController = new ChatController(messageRepository, userRepository);
+        this.messageRepository = messageRepository;
     }
 
     @PostMapping("/home")
@@ -195,6 +196,9 @@ public class UserController {
             }
 
             if(chatroom != null){
+                prevConversation(model, id);
+                //ArrayList<Message> conversation = messageRepository.getAllMessagesInChatroom(id);
+
                 model.addAttribute("categories", categories);
                 //model.addAttribute("chatroom", chatroomWithUser);
                 //model.addAttribute("user", user);
@@ -202,6 +206,7 @@ public class UserController {
                 model.addAttribute("user", user);
                 model.addAttribute("chatroom", cr);
                 model.addAttribute("chatroomId", id);
+                //model.addAttribute("conversation", conversation);
                 chatroom(model, cr);
             }
 
@@ -227,11 +232,19 @@ public class UserController {
         model.addAttribute("usernames", userNames);
     }
 
+    private void prevConversation(Model model, Integer chatroomId) {
+        ArrayList<Message> conversation = messageRepository.getAllMessagesInChatroom(chatroomId);
+        ArrayList<MessageUserDTO> usernameConversations = new ArrayList<MessageUserDTO>();
+        for (Message mes : conversation) {
+            Integer userId = messageRepository.getUserIdByMessageId(mes.getId());
+            String name = userRepository.getUsername(userId);
 
-
-    public void sendingMessage(String message, Model model) {
-        if(message != null) {
+            MessageUserDTO userMessage = new MessageUserDTO();
+            userMessage.setMessage(mes);
+            userMessage.setUsername(name);
+            usernameConversations.add(userMessage);
         }
+        model.addAttribute("conversation", usernameConversations);
     }
 
 }
