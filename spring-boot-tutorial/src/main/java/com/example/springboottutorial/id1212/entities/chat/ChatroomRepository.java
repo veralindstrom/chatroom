@@ -12,7 +12,7 @@ public interface ChatroomRepository extends CrudRepository<Chatroom, String> {
     Chatroom findChatRoomByName(String name);
 
     @Query("select c.chatroomId from Chatroom c")
-    List<Integer> getAllId();
+    ArrayList<Integer> getAllId();
 
     @Query("select c from Chatroom c WHERE c.status = true")
     ArrayList<Chatroom>  getAllPublicId();
