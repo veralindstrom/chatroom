@@ -1,12 +1,16 @@
-package com.example.springboottutorial.id1212.entities.bridges;
+package com.example.springboottutorial.id1212.entities.bridges.ChatroomUser;
+
+import com.example.springboottutorial.id1212.entities.bridges.ChatroomCategory.ChatroomCategoryId;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name="chatroom_user")
+@IdClass(ChatroomUserId.class)
 public class ChatroomUser {
     @Id
     private Integer chatroomId;
+    @Id
     private Integer userId;
     private Integer roleId;
     private boolean admin;

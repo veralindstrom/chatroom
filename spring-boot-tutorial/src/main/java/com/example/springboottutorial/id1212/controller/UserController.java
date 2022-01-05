@@ -2,8 +2,8 @@ package com.example.springboottutorial.id1212.controller;
 
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomCategory.ChatroomCategory;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomCategory.ChatroomCategoryRepository;
-import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser;
-import com.example.springboottutorial.id1212.entities.bridges.ChatroomUserRepository;
+import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser.ChatroomUser;
+import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser.ChatroomUserRepository;
 import com.example.springboottutorial.id1212.entities.category.Category;
 import com.example.springboottutorial.id1212.entities.category.CategoryRepository;
 import com.example.springboottutorial.id1212.entities.chat.Chatroom;
@@ -24,8 +24,6 @@ public class UserController {
     private final CategoryRepository categoryRepository;
     private final ChatroomCategoryRepository chatroomCategoryRepository;
     private User user;
-    private Chatroom chatroom;
-    private ArrayList<Chatroom> chatrooms;
     private ChatroomCategory chatroomCategory;
 
     public UserController(ChatroomCategoryRepository chatroomCategoryRepository, CategoryRepository categoryRepository, UserRepository userRepository, ChatroomUserRepository chatroomUserRepository, ChatroomRepository chatroomRepository) {
@@ -68,7 +66,7 @@ public class UserController {
 
     private void home(Model model) {
         ArrayList<ChatroomUser> chatroomUser = chatroomUserRepository.findChatroomUsersByUserId(user.getUserId());
-        chatrooms = new ArrayList<>();
+        ArrayList<Chatroom> chatrooms = new ArrayList<>();
         ArrayList<Chatroom> publicChatrooms = chatroomRepository.getAllPublicId();
         for(ChatroomUser cu : chatroomUser) {
             Integer chatId = cu.getChatroomId();
@@ -83,7 +81,7 @@ public class UserController {
     @GetMapping("/create-chatroom")
     public String createChatroom1(Model model) {
         if(user != null){
-            chatroom = new Chatroom();
+            Chatroom chatroom = new Chatroom();
             ArrayList<Category> categories = (ArrayList<Category>) categoryRepository.findAll();
             model.addAttribute("categories", categories);
             model.addAttribute("chatroom", chatroom);
@@ -169,9 +167,18 @@ public class UserController {
     public String showChatroom(@PathVariable Integer id, Model model) {
         if(user != null){
             Integer userId = user.getUserId();
+            Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
             ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(userId, id);
+            //Chatroom chatroomWithUser = chatroomRepository.findChatRoomByChatroomId(chatroomUser.getChatroomId());
+            ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByChatroomId(id);
+            ArrayList<Category> categories = new ArrayList<>();
+            for(ChatroomCategory chatroomCategory : chatroomCategories){
+                categories.add(categoryRepository.findCategoryBycategoryId(chatroomCategory.getCategoryId()));
+            }
 
             if(chatroomUser == null) { // if chatroomUser not exist - user joined new public room
+                chatroom.addUserCount(1);
+                chatroomRepository.save(chatroom);
                 chatroomUser = new ChatroomUser();
                 chatroomUser.setChatroomId(id);
                 chatroomUser.setUserId(userId);
@@ -180,25 +187,18 @@ public class UserController {
                 return "redirect:/chatroom/{id}";
             }
 
-            /*VERAS CODE START*/
-            Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(chatroomUser.getChatroomId());
-            ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByChatroomId(id);
-            ArrayList<Category> categories = new ArrayList<>();
-            for(ChatroomCategory chatroomCategory : chatroomCategories){
-                categories.add(categoryRepository.findCategoryBycategoryId(chatroomCategory.getCategoryId()));
-            }
-
             if(chatroom != null){
                 model.addAttribute("categories", categories);
-                model.addAttribute("chatroom", chatroom);
+                //model.addAttribute("chatroom", chatroomWithUser);
+                //model.addAttribute("user", user);
+                Chatroom cr = chatroomRepository.findChatRoomByChatroomId(id);
                 model.addAttribute("user", user);
+                model.addAttribute("chatroom", cr);
+                model.addAttribute("chatroomId", id);
+                chatroom(model, cr);
             }
-            /*VERAS CODE END*/
-            model.addAttribute("user", new User());
 
-            /*VERAS CODE START*/
             return "chatroom";
-            /*VERAS CODE END*/
         }
         else {
             String message = "You are logged out";
@@ -206,4 +206,18 @@ public class UserController {
         }
         return "index";
     }
+
+    private void chatroom(Model model, Chatroom chat) {
+        Integer chatId = chat.getId();
+        //Integer userId = user.getUserId();
+        //ArrayList<ChatroomUser> chatroomUserList = chatroomUserRepository.findChatroomUsersByChatroomId(chatId);
+        ArrayList<Integer> userIdList = chatroomUserRepository.getAllUserIdsByChatroomId(chatId);
+        ArrayList<String> userNames = new ArrayList<String>();
+        for (Integer id : userIdList) {
+            String name = userRepository.getUsername(id);
+            userNames.add(name);
+        }
+        model.addAttribute("usernames", userNames);
+    }
+
 }
