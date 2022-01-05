@@ -8,8 +8,10 @@ import com.example.springboottutorial.id1212.entities.category.Category;
 import com.example.springboottutorial.id1212.entities.category.CategoryRepository;
 import com.example.springboottutorial.id1212.entities.chat.Chatroom;
 import com.example.springboottutorial.id1212.entities.chat.ChatroomRepository;
+import com.example.springboottutorial.id1212.entities.chat.MessageRepository;
 import com.example.springboottutorial.id1212.entities.user.User;
 import com.example.springboottutorial.id1212.entities.user.UserRepository;
+import com.example.springboottutorial.id1212.entities.chat.Message;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,16 +25,21 @@ public class UserController {
     private final ChatroomRepository chatroomRepository;
     private final CategoryRepository categoryRepository;
     private final ChatroomCategoryRepository chatroomCategoryRepository;
+   // private MessageRepository messageRepository;
+    //private ChatController chatController;
     private User user;
     private ChatroomCategory chatroomCategory;
 
-    public UserController(ChatroomCategoryRepository chatroomCategoryRepository, CategoryRepository categoryRepository, UserRepository userRepository, ChatroomUserRepository chatroomUserRepository, ChatroomRepository chatroomRepository) {
+    public UserController(ChatroomCategoryRepository chatroomCategoryRepository, CategoryRepository categoryRepository,
+                          UserRepository userRepository, ChatroomUserRepository chatroomUserRepository,
+                          ChatroomRepository chatroomRepository, MessageRepository messageRepository) {
         this.userRepository = userRepository;
         this.chatroomUserRepository = chatroomUserRepository;
         this.chatroomRepository = chatroomRepository;
         this.categoryRepository = categoryRepository;
         this.chatroomCategoryRepository = chatroomCategoryRepository;
-
+        //this.messageRepository = messageRepository;
+        //this.chatController = new ChatController(messageRepository, userRepository);
     }
 
     @PostMapping("/home")
@@ -192,6 +199,8 @@ public class UserController {
                 //model.addAttribute("chatroom", chatroomWithUser);
                 //model.addAttribute("user", user);
                 Chatroom cr = chatroomRepository.findChatRoomByChatroomId(id);
+                Message userMessage = new Message();
+                model.addAttribute("message", userMessage);
                 model.addAttribute("user", user);
                 model.addAttribute("chatroom", cr);
                 model.addAttribute("chatroomId", id);
@@ -218,6 +227,13 @@ public class UserController {
             userNames.add(name);
         }
         model.addAttribute("usernames", userNames);
+    }
+
+
+
+    public void sendingMessage(String message, Model model) {
+        if(message != null) {
+        }
     }
 
 }

@@ -5,7 +5,7 @@ import java.util.Date;
 
 @Entity
 @Table(name="message")
-public class ChatMessage {
+public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer messageId;
@@ -47,11 +47,11 @@ public class ChatMessage {
         this.fileId = fileId;
     }
 
-    public Integer getuserId(){
+    public Integer getUserId(){
         return userId;
     }
 
-    public void setuserId(Integer userId){
+    public void setUserId(Integer userId){
         this.userId = userId;
     }
 
