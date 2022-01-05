@@ -7,6 +7,10 @@
 <body>
     <h3>User</h3>
     <h6 th:text="${user.username}"></h6>
+    <form th:action="@{/logout}" method="GET" style="max-width: 600px; margin: 0 auto";>
+        <label class="col-4 col-form-label"> Done? </label>
+        <button type="submit" class="btn">Log out</button>
+    </form>
     <form th:action="@{/create-chatroom}" method="GET" style="max-width: 600px; margin: 0 auto";>
         <label class="col-4 col-form-label"> Create a new chatroom? </label>
         <button type="submit" class="btn">Add</button>
@@ -17,6 +21,9 @@
         <ul th:each="chatroom: ${chatroom}">
             <li>
                 <a th:href="@{/chatroom/{id}(id=${chatroom.id})}" th:text="${chatroom.name}"></a>
+                <form th:action="@{/leave-chatroom/{id}(id=${chatroom.id})}" method="GET" style="max-width: 600px; margin: 0 auto";>
+                    <button type="submit" class="btn">Leave</button>
+                </form>
             </li>
         </ul>
     </div>

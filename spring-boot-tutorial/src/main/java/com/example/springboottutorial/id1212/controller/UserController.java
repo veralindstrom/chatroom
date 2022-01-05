@@ -1,5 +1,7 @@
 package com.example.springboottutorial.id1212.controller;
 
+import com.example.springboottutorial.id1212.entities.bridges.ChatroomCategory.ChatroomCategory;
+import com.example.springboottutorial.id1212.entities.bridges.ChatroomCategory.ChatroomCategoryRepository;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomUserRepository;
 import com.example.springboottutorial.id1212.entities.category.Category;
@@ -20,15 +22,18 @@ public class UserController {
     private final ChatroomUserRepository chatroomUserRepository;
     private final ChatroomRepository chatroomRepository;
     private final CategoryRepository categoryRepository;
+    private final ChatroomCategoryRepository chatroomCategoryRepository;
     private User user;
     private Chatroom chatroom;
     private ArrayList<Chatroom> chatrooms;
+    private ChatroomCategory chatroomCategory;
 
-    public UserController(CategoryRepository categoryRepository, UserRepository userRepository, ChatroomUserRepository chatroomUserRepository, ChatroomRepository chatroomRepository) {
+    public UserController(ChatroomCategoryRepository chatroomCategoryRepository, CategoryRepository categoryRepository, UserRepository userRepository, ChatroomUserRepository chatroomUserRepository, ChatroomRepository chatroomRepository) {
         this.userRepository = userRepository;
         this.chatroomUserRepository = chatroomUserRepository;
         this.chatroomRepository = chatroomRepository;
         this.categoryRepository = categoryRepository;
+        this.chatroomCategoryRepository = chatroomCategoryRepository;
 
     }
 
@@ -77,28 +82,45 @@ public class UserController {
 
     @GetMapping("/create-chatroom")
     public String createChatroom1(Model model) {
-        chatroom = new Chatroom();
-        Category cat1 = new Category();
-        cat1.setCategory("Programming");
-        categoryRepository.save(cat1);
-        ArrayList<Category> categories = (ArrayList<Category>) categoryRepository.findAll();
-        model.addAttribute("categories", categories);
-        model.addAttribute("chatroom", chatroom);
+        if(user != null){
+            chatroom = new Chatroom();
+            ArrayList<Category> categories = (ArrayList<Category>) categoryRepository.findAll();
+            model.addAttribute("categories", categories);
+            model.addAttribute("chatroom", chatroom);
 
-        return "create-chatroom";
+            return "create-chatroom";
+        }
+        else {
+            String message = "You are logged out";
+            model.addAttribute("message", message);
+        }
+        return "index";
     }
 
     @PostMapping("/create-chatroom-process")
-    public String processChatroom1(Chatroom chatroom) {
-        chatroom.addUserCount(1);
-        chatroomRepository.save(chatroom);
-        ChatroomUser chatroomUser = new ChatroomUser();
-        chatroomUser.setChatroomId(chatroom.getId());
-        chatroomUser.setUserId(user.getUserId());
-        chatroomUser.setAdmin(true);
-        chatroomUserRepository.save(chatroomUser);
+    public String processChatroom1(Model model, Chatroom chatroom, @RequestParam("categoryId") ArrayList<Integer> categoryIds) {
+        if(user != null){
+            chatroom.addUserCount(1);
+            chatroomRepository.save(chatroom);
+            for (Integer categoryId : categoryIds){
+                chatroomCategory = new ChatroomCategory();
+                chatroomCategory.setCategoryId(categoryId);
+                chatroomCategory.setChatroomId(chatroom.getId());
+                chatroomCategoryRepository.save(chatroomCategory);
+            }
+            ChatroomUser chatroomUser = new ChatroomUser();
+            chatroomUser.setChatroomId(chatroom.getId());
+            chatroomUser.setUserId(user.getUserId());
+            chatroomUser.setAdmin(true);
+            chatroomUserRepository.save(chatroomUser);
 
-        return "create-chatroom-success";
+            return "create-chatroom-success";
+        }
+        else {
+            String message = "You are logged out";
+            model.addAttribute("message", message);
+        }
+        return "index";
     }
 
     @GetMapping("/signup")
@@ -115,20 +137,73 @@ public class UserController {
         return "signup-success";
     }
 
+    @GetMapping("/logout")
+    public String logout(Model model) {
+        user = null;
+
+        return "redirect:/home"; //to let user know she logged out
+    }
+
+    @GetMapping("/leave-chatroom/{id}")
+    public String leaveChatroom(@PathVariable Integer id, Model model){
+        ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(user.getUserId(), id);
+        chatroomUserRepository.delete(chatroomUser);
+        Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
+        ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByChatroomId(id);
+        if(chatroomUser.getAdmin()) {
+            /*if chatroom had categories the bridge needs to be removed first*/
+            if(chatroomCategories.size() > 0) {
+                for(ChatroomCategory cc : chatroomCategories){
+                    chatroomCategoryRepository.delete(cc);
+                }
+            }
+            /*if chatroom had messages those needs to be removed too (for later)*/
+
+            /*deleting chatroom*/
+            chatroomRepository.delete(chatroom);
+        }
+        return "leave-chatroom";
+    }
+
     @GetMapping("/chatroom/{id}")
     public String showChatroom(@PathVariable Integer id, Model model) {
-        /*later id is used to set as attribute to show specified chatroom*/
-        Integer userId = user.getUserId();
-        ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(userId, id);
-        if(chatroomUser == null) { // if chatroomUser not exist - user joined new public room
-            chatroomUser = new ChatroomUser();
-            chatroomUser.setChatroomId(id);
-            chatroomUser.setUserId(userId);
-            chatroomUser.setAdmin(false);
-            chatroomUserRepository.save(chatroomUser);
-        }
-        model.addAttribute("user", new User());
+        if(user != null){
+            Integer userId = user.getUserId();
+            ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(userId, id);
 
-        return "chatroom";
+            if(chatroomUser == null) { // if chatroomUser not exist - user joined new public room
+                chatroomUser = new ChatroomUser();
+                chatroomUser.setChatroomId(id);
+                chatroomUser.setUserId(userId);
+                chatroomUser.setAdmin(false);
+                chatroomUserRepository.save(chatroomUser);
+                return "redirect:/chatroom/{id}";
+            }
+
+            /*VERAS CODE START*/
+            Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(chatroomUser.getChatroomId());
+            ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByChatroomId(id);
+            ArrayList<Category> categories = new ArrayList<>();
+            for(ChatroomCategory chatroomCategory : chatroomCategories){
+                categories.add(categoryRepository.findCategoryBycategoryId(chatroomCategory.getCategoryId()));
+            }
+
+            if(chatroom != null){
+                model.addAttribute("categories", categories);
+                model.addAttribute("chatroom", chatroom);
+                model.addAttribute("user", user);
+            }
+            /*VERAS CODE END*/
+            model.addAttribute("user", new User());
+
+            /*VERAS CODE START*/
+            return "chatroom";
+            /*VERAS CODE END*/
+        }
+        else {
+            String message = "You are logged out";
+            model.addAttribute("message", message);
+        }
+        return "index";
     }
 }

@@ -27,11 +27,9 @@
         <fieldset class="row mb-3">
             <legend class="col-form-label col-sm-2 pt-0">Category</legend>
             <div class="col-sm-10">
-                <div class="btn-group" role="group" th:each="category, iter: ${categories}" th:object="${object2}" aria-label="Basic checkbox toggle button group">
-
-                    <input type="checkbox" class="btn-check" th:id="'btncheck' + ${iter.index}" autocomplete="off">
-                    <label class="btn btn-outline-primary" th:for="'btncheck' + ${iter.index}" th:text="${category.category}"></label>
-
+                <div class="btn-group" role="group" th:each="category: ${categories}" aria-label="Basic checkbox toggle button group">
+                    <input type="checkbox" class="btn-check"  th:id="'btncheck' + ${category.categoryId - 1}" name="categoryId" th:value="${category.categoryId}" autocomplete="off">
+                    <label class="btn btn-outline-primary" th:for="'btncheck' + ${category.categoryId - 1}" th:text="${category.category}"></label>
                 </div>
             </div>
         </fieldset>

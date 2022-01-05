@@ -11,11 +11,11 @@ public class Category implements Serializable {
     private Integer categoryId;
     private String category;
 
-    public Integer getcategoryId() {
+    public Integer getCategoryId() {
         return categoryId;
     }
 
-    public void setcategoryId(Integer categoryId) {
+    public void setCategoryId(Integer categoryId) {
         this.categoryId = categoryId;
     }
 

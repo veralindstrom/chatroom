@@ -9,7 +9,6 @@
     <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
-
 </head>
 <body>
 
@@ -30,7 +29,7 @@
 <div class="container hidden">
     <div class="row">
         <div class="chat-header col">
-            <h2>Spring WebSocket Chat Demo</h2>
+            <h2 th:text="${chatroom.name}"></h2>
         </div>
         <div class="chat-header col" style="text-align: right;">
             <label class="form-check-label" for="gridCheck1">
@@ -67,6 +66,12 @@
                 <li class="list-group-item">And a fifth member</li>
             </ul>
         </div>
+    </div>
+    <div class="row" style="text-align: right;">
+        <h5 style="text-align: left;">Categories: </h5>
+        <ul class="list-group list-group-horizontal" th:each="category: ${categories}">
+            <li class="list-group-item" th:text="${category.category}"></li>
+        </ul>
     </div>
 </div>
 </body>
