@@ -1,6 +1,7 @@
 package com.example.springboottutorial.id1212.controller;
 
 import com.example.springboottutorial.id1212.DTO.MessageUserDTO;
+import com.example.springboottutorial.id1212.DTO.UserRoleDTO;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomCategory.ChatroomCategory;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomCategory.ChatroomCategoryRepository;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser.ChatroomUser;
@@ -179,6 +180,8 @@ public class UserController {
             //Chatroom chatroomWithUser = chatroomRepository.findChatRoomByChatroomId(chatroomUser.getChatroomId());
             ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByChatroomId(id);
             ArrayList<Category> categories = new ArrayList<>();
+
+
             for(ChatroomCategory chatroomCategory : chatroomCategories){
                 categories.add(categoryRepository.findCategoryBycategoryId(chatroomCategory.getCategoryId()));
             }
@@ -196,16 +199,21 @@ public class UserController {
 
             if(chatroom != null){
                 prevConversation(model, id);
-                //ArrayList<Message> conversation = messageRepository.getAllMessagesInChatroom(id);
+                chatroomRole(model, id);
+
+                Integer roleId = chatroomUser.getRoleId();
+                if(roleId != null) {
+                    Role role = roleRepository.findRoleByRoleId(roleId);
+                    String roleName = role.getRole();
+                    model.addAttribute("userRole", roleName);
+                }
 
                 model.addAttribute("categories", categories);
                 //model.addAttribute("chatroom", chatroomWithUser);
-                //model.addAttribute("user", user);
                 Chatroom cr = chatroomRepository.findChatRoomByChatroomId(id);
                 model.addAttribute("user", user);
                 model.addAttribute("chatroom", cr);
                 model.addAttribute("chatroomId", id);
-                //model.addAttribute("conversation", conversation);
                 chatroom(model, cr);
             }
 
@@ -216,6 +224,24 @@ public class UserController {
             model.addAttribute("message", message);
         }
         return "index";
+    }
+
+    private void chatroomRole(Model model, Integer chatroomId) {
+        ArrayList<Integer> userIdsInChatroom = chatroomUserRepository.getAllUserIdsByChatroomId(chatroomId);
+        ArrayList<UserRoleDTO> userRoles = new ArrayList<UserRoleDTO>();
+        for (Integer userId : userIdsInChatroom) {
+            UserRoleDTO userRole = new UserRoleDTO();
+            String username = user.getUsername();
+            userRole.setUsername(username);
+            Integer roleId = chatroomUserRepository.getRoleIdByUserIdChatroomId(userId, chatroomId);
+            if(roleId != null) {
+                Role role = roleRepository.findRoleByRoleId(roleId);
+                String roleName = role.getRole();
+                userRole.setRole(roleName);
+            }
+            userRoles.add(userRole);
+        }
+        model.addAttribute("userroles", userRoles);
     }
 
     private void chatroom(Model model, Chatroom chat) {

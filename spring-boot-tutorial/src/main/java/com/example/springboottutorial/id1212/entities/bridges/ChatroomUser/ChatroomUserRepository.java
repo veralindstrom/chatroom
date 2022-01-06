@@ -1,6 +1,7 @@
 package com.example.springboottutorial.id1212.entities.bridges.ChatroomUser;
 
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser.ChatroomUser;
+import com.example.springboottutorial.id1212.entities.chat.Message;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -22,6 +23,12 @@ public interface ChatroomUserRepository extends CrudRepository<ChatroomUser, Int
 
     @Query("SELECT c.userId FROM ChatroomUser c WHERE c.chatroomId = ?1")
     ArrayList<Integer> getAllUserIdsByChatroomId(Integer userId);
+
+    @Query("SELECT c.userId FROM ChatroomUser c WHERE c.chatroomId = ?1 order by c.userId ASC")
+    ArrayList<Integer> getAllUserIdsByChatroomIdAscUserIdOrder(Integer chatroomId);
+
+    @Query("SELECT c.roleId FROM ChatroomUser c WHERE c.userId = ?1 AND c.chatroomId = ?2")
+    Integer getRoleIdByUserIdChatroomId(Integer userId, Integer chatroomId);
 
     @Modifying
     @Transactional
