@@ -22,14 +22,14 @@
             <div class="form-group">
                 <input type="text" id="name" th:value="${user.username}" autocomplete="on" class="form-control" disabled/>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="startForm" style="display:block">
                 <button type="submit" class="accent username-submit">Start chatting</button>
             </div>
         </form>
     </div>
 </div>
 
-<div class="container hidden">
+<div class="container">
     <div class="row">
         <div class="chat-header col">
             <h2 th:text="${chatroom.name}"></h2>
@@ -42,9 +42,9 @@
         </div>
     </div>
     <div class="row">
-        <div id="chat-page" class="hidden col">
+        <div id="chat-page" class="col">
             <div class="chat-container">
-                <div class="connecting">
+                <div id="connecting" style="display:none">
                     Connecting...
                 </div>
                 <ul th:each="conv : ${conversation}">
@@ -58,7 +58,7 @@
                 <ul id="messageArea">
 
                 </ul>
-                <form id="messageForm" name="messageForm">
+                <form id="messageForm" name="messageForm" style="display:none">
                     <div class="form-group">
                         <div class="input-group clearfix">
                             <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control"/>
@@ -67,6 +67,11 @@
                     </div>
                 </form>
             </div>
+            <form id="leaveForm" name="usernameForm" style="display:none">
+                <div class="form-group">
+                    <button type="submit" class="accent username-submit">Stop chatting</button>
+                </div>
+            </form>
         </div>
         <div class="col">
             <ul style="background-color: cornflowerblue">
@@ -81,16 +86,6 @@
                     <span class="list-group-item" th:text="${userrole.role}"></span>
                 </li>
             </ul>
-            <!--ul>
-                <li>
-                    <span class="list-group-item" th:text="${useradmin.username}"></span>
-                    <span class="list-group-item" th:text="${useradmin.role}"></span>
-                </li>
-                <li  th:each="userrole : ${userroles}">
-                    <span class="list-group-item" th:text="${userrole.username}"></span>
-                    <span class="list-group-item" th:text="${userrole.role}"></span>
-                </li>
-            </ul-->
 
             <form th:action="@{/chatroom/{id}/create-role(id=${chatroom.id})}" method="GET" style="max-width: 600px; margin: 0 auto";>
                 <label class="col-4 col-form-label"> Want a role? </label>
@@ -121,7 +116,9 @@
     var messageForm = document.querySelector('#messageForm');
     var messageInput = document.querySelector('#message');
     var messageArea = document.querySelector('#messageArea');
-    var connectingElement = document.querySelector('.connecting');
+    var connectingElement = document.querySelector('#connecting');
+    var startForm = document.querySelector('#startForm');
+    var leaveForm = document.querySelector('#leaveForm');
 
     var stompClient = null;
     var username = null;
@@ -133,11 +130,13 @@
     ];
 
     function connect(event) {
-        username = document.querySelector('#name').value.trim();
+        messageForm.style.display = "block";  // <-- Set it to block to display
+        leaveForm.style.display = "block";
+        startForm.style.display = "none";
 
+        username = document.querySelector('#name').value.trim();
         if(username) {
-            usernamePage.classList.add('hidden');
-            chatPage.classList.remove('hidden');
+            connectingElement.style.display = "block";
 
             var socket = new SockJS('/ws');
             stompClient = Stomp.over(socket);
@@ -146,7 +145,6 @@
         }
         event.preventDefault();
     }
-
 
     function onConnected() {
         // Subscribe to the Public Topic
@@ -157,16 +155,31 @@
             {},
             JSON.stringify({sender: username, type: 'JOIN'})  // adding user in ChatController and sending join
         )
+        connectingElement.style.display = "none";
+    }
 
-        connectingElement.classList.add('hidden');
+    function leave(event) {
+        messageForm.style.display = "none";  // <-- Set it back to none to hide display
+        leaveForm.style.display = "none";
+        startForm.style.display = "block";
+
+        username = document.querySelector('#name').value.trim();
+        if(username) {
+            var chatMessage = {
+                sender: username,
+                type: 'LEAVE',
+            };
+            stompClient.send("/app/chat.leaveUser", {}, JSON.stringify(chatMessage));
+        }
+        event.preventDefault();
     }
 
 
     function onError(error) {
         connectingElement.textContent = 'Could not connect to WebSocket server. Please refresh this page to try again!';
         connectingElement.style.color = 'red';
+        connectingElement.style.display = "block";
     }
-
 
     function sendMessage(event) {
         var messageContent = messageInput.value.trim();
@@ -199,34 +212,32 @@
             messageElement.classList.add('event-message');
             message.content = message.sender + ' joined!'; // message when joining
         } else if (message.type === 'LEAVE') {
-            messageElement.classList.add('event-message'); // message when leaving
-            message.content = message.sender + ' left!';
+            messageElement.classList.add('event-message');
+            message.content = message.sender + ' left!';  // message when leaving
         } else {
             messageElement.classList.add('chat-message');
 
-            //message.content = dateTime;
-
-            var avatarElement = document.createElement('i');
+            var avatarElement = document.createElement('i');  // i - tag for avatar color
             var avatarText = document.createTextNode(message.sender[0]);
             avatarElement.appendChild(avatarText);
             avatarElement.style['background-color'] = getAvatarColor(message.sender);
 
             messageElement.appendChild(avatarElement);
 
-            var usernameElement = document.createElement('span');
+            var usernameElement = document.createElement('span'); // span - tag for username sender
             var usernameText = document.createTextNode(message.sender);
             usernameElement.appendChild(usernameText);
             messageElement.appendChild(usernameElement);
         }
 
         var textElement = document.createElement('p');
-        var messageText = document.createTextNode(message.content);
+        var messageText = document.createTextNode(message.content); // p - tag for message content
         textElement.appendChild(messageText);
 
         messageElement.appendChild(textElement);
 
         messageArea.appendChild(messageElement);
-        messageArea.scrollTop = messageArea.scrollHeight;
+        messageArea.scrollTop = messageArea.scrollHeight;  // all inserted into ul tag with id messageArea
     }
 
 
@@ -241,5 +252,7 @@
 
     usernameForm.addEventListener('submit', connect, true)
     messageForm.addEventListener('submit', sendMessage, true)
+    leaveForm.addEventListener('submit', leave, true)
+
 </script>
 </html>
