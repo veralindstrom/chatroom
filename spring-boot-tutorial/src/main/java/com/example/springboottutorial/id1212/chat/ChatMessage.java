@@ -1,12 +1,15 @@
 package com.example.springboottutorial.id1212.chat;
 
 
+import java.util.Date;
+
 public class ChatMessage {
     private MessageType type;
     private String content;
     private String sender;
     private String date;
     private Integer chatroomId;
+    private Integer userId;
 
     public enum MessageType {
         CHAT,
@@ -52,5 +55,13 @@ public class ChatMessage {
 
     public void setChatroomId(Integer chatroomId) {
         this.chatroomId = chatroomId;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 }

@@ -18,22 +18,19 @@ import java.util.Date;
 @Controller
 public class ChatController {
     private final MessageRepository messageRepository;
-    private final UserRepository userRepository;
 
-    public ChatController(MessageRepository messageRepository, UserRepository userRepository) {
+    public ChatController(MessageRepository messageRepository) {
         this.messageRepository = messageRepository;
-        this.userRepository = userRepository;
     }
 
     @MessageMapping("/chat.sendMessage")
     @SendTo("/topic/public")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) throws ParseException {
-        String sender = chatMessage.getSender(); // username
         String messageContent = chatMessage.getContent();
-        String date = chatMessage.getDate();
+        String date = chatMessage.getDate(); // date is correct
         Integer chatroomId = chatMessage.getChatroomId();
+        Integer userId = chatMessage.getUserId(); // if username is not unique
 
-        Integer userId = userRepository.getUserIdByUsername(sender);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date newDate = formatter.parse(date);
 

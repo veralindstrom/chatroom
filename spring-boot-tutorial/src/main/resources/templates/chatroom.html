@@ -16,6 +16,7 @@
         <h1 class="title">Chatroom: </h1>
         <h1 class="title" id="chatId" th:text="${chatroomId}"></h1>
         <h1 class="title" th:text="${chatroom.name}"></h1>
+        <div style="display:none" id="userId" th:text="${user.userId}"></div>
         <form id="usernameForm" name="usernameForm">
             <div class="form-group">
                 <input type="text" id="name" th:value="${user.username}" autocomplete="on" class="form-control" disabled/>
@@ -99,6 +100,7 @@
 
     var stompClient = null;
     var username = null;
+    var dateTime = null;
 
     var colors = [
         '#2196F3', '#32c787', '#00BCD4', '#ff5652',
@@ -144,14 +146,17 @@
     function sendMessage(event) {
         var messageContent = messageInput.value.trim();
         var chatroomId = document.querySelector('#chatId').textContent;
+        var userId = document.querySelector('#userId').textContent;
+        dateTime = new Date().toLocaleString('sv-SE');
 
         if(messageContent && stompClient) {
             var chatMessage = {
                 sender: username,
                 content: messageInput.value,
                 type: 'CHAT',
-                date: new Date().toLocaleString('sv-SE'),
-                chatroomId: chatroomId
+                date: dateTime,
+                chatroomId: chatroomId,
+                userId : userId
             };
             stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
             messageInput.value = '';
@@ -173,6 +178,8 @@
             message.content = message.sender + ' left!';
         } else {
             messageElement.classList.add('chat-message');
+
+            //message.content = dateTime;
 
             var avatarElement = document.createElement('i');
             var avatarText = document.createTextNode(message.sender[0]);
