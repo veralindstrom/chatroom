@@ -14,7 +14,7 @@ public class ChatroomUser {
     private Integer userId;
     @Id
     private Integer roleId;
-    private boolean admin;
+    private Integer admin;
     private boolean favorite;
 
     public Integer getChatroomId() {
@@ -41,11 +41,11 @@ public class ChatroomUser {
         this.roleId = roleId;
     }
 
-    public boolean getAdmin(){
+    public Integer getAdmin(){
         return admin;
     }
 
-    public void setAdmin(boolean admin){
+    public void setAdmin(Integer admin){
         this.admin = admin;
     }
 

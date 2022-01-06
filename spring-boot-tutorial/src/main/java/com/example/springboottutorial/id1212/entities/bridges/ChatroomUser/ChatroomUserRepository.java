@@ -22,13 +22,16 @@ public interface ChatroomUserRepository extends CrudRepository<ChatroomUser, Int
     ArrayList<Integer> getAllChatroomIdsByUserId(Integer userId);
 
     @Query("SELECT c.userId FROM ChatroomUser c WHERE c.chatroomId = ?1")
-    ArrayList<Integer> getAllUserIdsByChatroomId(Integer userId);
+    ArrayList<Integer> getAllUserIdsByChatroomId(Integer chatroomId);
 
-    @Query("SELECT c.userId FROM ChatroomUser c WHERE c.chatroomId = ?1 order by c.userId ASC")
-    ArrayList<Integer> getAllUserIdsByChatroomIdAscUserIdOrder(Integer chatroomId);
+    @Query("SELECT c.userId FROM ChatroomUser c WHERE c.chatroomId = ?1 order by c.roleId DESC")
+    ArrayList<Integer> getAllUserIdsByChatroomIdDescRoleIdOrder(Integer chatroomId);
 
     @Query("SELECT c.roleId FROM ChatroomUser c WHERE c.userId = ?1 AND c.chatroomId = ?2")
     Integer getRoleIdByUserIdChatroomId(Integer userId, Integer chatroomId);
+
+    @Query("SELECT c.admin FROM ChatroomUser c WHERE c.userId = ?1 AND c.chatroomId = ?2")
+    Integer getAdminStatusByUserIdChatroomId(Integer userId, Integer chatroomId);
 
     @Modifying
     @Transactional

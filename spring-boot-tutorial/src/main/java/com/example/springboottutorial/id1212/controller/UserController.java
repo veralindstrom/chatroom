@@ -117,7 +117,7 @@ public class UserController {
             ChatroomUser chatroomUser = new ChatroomUser();
             chatroomUser.setChatroomId(chatroom.getId());
             chatroomUser.setUserId(user.getUserId());
-            chatroomUser.setAdmin(true);
+            chatroomUser.setAdmin(1); // TRUE
             chatroomUserRepository.save(chatroomUser);
 
             return "create-chatroom-success";
@@ -156,7 +156,7 @@ public class UserController {
         chatroomUserRepository.delete(chatroomUser);
         Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
         ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByChatroomId(id);
-        if(chatroomUser.getAdmin()) {
+        if(chatroomUser.getAdmin() == 1) { // TRUE
             /*if chatroom had categories the bridge needs to be removed first*/
             if(chatroomCategories.size() > 0) {
                 for(ChatroomCategory cc : chatroomCategories){
@@ -192,7 +192,7 @@ public class UserController {
                 chatroomUser = new ChatroomUser();
                 chatroomUser.setChatroomId(id);
                 chatroomUser.setUserId(userId);
-                chatroomUser.setAdmin(false);
+                chatroomUser.setAdmin(0); // FALSE
                 chatroomUserRepository.save(chatroomUser);
                 return "redirect:/chatroom/{id}";
             }
@@ -229,10 +229,13 @@ public class UserController {
     private void chatroomRole(Model model, Integer chatroomId) {
         ArrayList<Integer> userIdsInChatroom = chatroomUserRepository.getAllUserIdsByChatroomId(chatroomId);
         ArrayList<UserRoleDTO> userRoles = new ArrayList<UserRoleDTO>();
+        UserRoleDTO adminUser = new UserRoleDTO();
+
         for (Integer userId : userIdsInChatroom) {
             UserRoleDTO userRole = new UserRoleDTO();
-            String username = user.getUsername();
+            String username = userRepository.getUsername(userId);
             userRole.setUsername(username);
+
             Integer roleId = chatroomUserRepository.getRoleIdByUserIdChatroomId(userId, chatroomId);
             if(roleId != null) {
                 Role role = roleRepository.findRoleByRoleId(roleId);
@@ -240,6 +243,16 @@ public class UserController {
                 userRole.setRole(roleName);
             }
             userRoles.add(userRole);
+
+            Integer admin = chatroomUserRepository.getAdminStatusByUserIdChatroomId(userId, chatroomId);
+            if(admin == 1) { // TRUE
+                // place first in arraylists of userRoles
+                int index = userRoles.indexOf(userRole);
+                if(index != 0) {
+                    userRoles.remove(index);
+                    userRoles.add(0, userRole);
+                }
+            }
         }
         model.addAttribute("userroles", userRoles);
     }
