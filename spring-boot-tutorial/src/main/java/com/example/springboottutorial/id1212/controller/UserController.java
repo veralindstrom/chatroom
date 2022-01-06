@@ -227,33 +227,44 @@ public class UserController {
     }
 
     private void chatroomRole(Model model, Integer chatroomId) {
-        ArrayList<Integer> userIdsInChatroom = chatroomUserRepository.getAllUserIdsByChatroomId(chatroomId);
+        ArrayList<Integer> userIdsInChatroom = chatroomUserRepository.getAllUserIdsByChatroomIdDescRoleIdOrder(chatroomId);
         ArrayList<UserRoleDTO> userRoles = new ArrayList<UserRoleDTO>();
         UserRoleDTO adminUser = new UserRoleDTO();
 
         for (Integer userId : userIdsInChatroom) {
             UserRoleDTO userRole = new UserRoleDTO();
             String username = userRepository.getUsername(userId);
-            userRole.setUsername(username);
-
+            Integer admin = chatroomUserRepository.getAdminStatusByUserIdChatroomId(userId, chatroomId);
             Integer roleId = chatroomUserRepository.getRoleIdByUserIdChatroomId(userId, chatroomId);
+
             if(roleId != null) {
                 Role role = roleRepository.findRoleByRoleId(roleId);
                 String roleName = role.getRole();
-                userRole.setRole(roleName);
+                if(admin == 1) { // TRUE
+                    adminUser.setRole(roleName);
+                }
+                else { userRole.setRole(roleName); }
             }
-            userRoles.add(userRole);
 
-            Integer admin = chatroomUserRepository.getAdminStatusByUserIdChatroomId(userId, chatroomId);
             if(admin == 1) { // TRUE
+                adminUser.setUsername(username);
+            }
+            else {
+                userRole.setUsername(username);
+                userRoles.add(userRole);
+            }
+
+         /*   if(admin == 1) { // TRUE
                 // place first in arraylists of userRoles
                 int index = userRoles.indexOf(userRole);
                 if(index != 0) {
                     userRoles.remove(index);
-                    userRoles.add(0, userRole);
+                    adminUser.setUsername();
+                    //userRoles.add(0, userRole);
                 }
-            }
+            }*/
         }
+        model.addAttribute("adminuser", adminUser);
         model.addAttribute("userroles", userRoles);
     }
 
