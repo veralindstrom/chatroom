@@ -1,22 +1,20 @@
 package com.example.springboottutorial.id1212.entities.chat;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
+@Table(name="role")
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer roleId;
     private String role;
 
-    public Integer getroleId() {
+    public Integer getRoleId() {
         return roleId;
     }
 
-    public void setroleId(Integer roleId) {
+    public void setRoleId(Integer roleId) {
         this.roleId = roleId;
     }
 

@@ -12,6 +12,7 @@ public class ChatroomUser {
     private Integer chatroomId;
     @Id
     private Integer userId;
+    @Id
     private Integer roleId;
     private boolean admin;
     private boolean favorite;

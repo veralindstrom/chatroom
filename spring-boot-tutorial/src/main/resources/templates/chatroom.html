@@ -14,7 +14,7 @@
 <div id="username-page">
     <div class="username-page-container">
         <h1 class="title">Chatroom: </h1>
-        <h1 class="title" id="chatId" th:text="${chatroomId}"></h1>
+        <h1 style="display:none" class="title" id="chatId" th:text="${chatroomId}"></h1>
         <h1 class="title" th:text="${chatroom.name}"></h1>
         <div style="display:none" id="userId" th:text="${user.userId}"></div>
         <form id="usernameForm" name="usernameForm">
@@ -71,6 +71,10 @@
             <ul class="list-group" th:each="user: ${usernames}">
                 <li class="list-group-item" th:text="${user}"></li>
             </ul>
+            <form th:action="@{/chatroom/{id}/create-role(id=${chatroom.id})}" method="GET" style="max-width: 600px; margin: 0 auto";>
+                <label class="col-4 col-form-label"> Want a role? </label>
+                <button type="submit" class="btn">Create</button>
+            </form>
         </div>
     </div>
     <div class="row" style="text-align: right;">

@@ -7,12 +7,9 @@ import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser.Chatr
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser.ChatroomUserRepository;
 import com.example.springboottutorial.id1212.entities.category.Category;
 import com.example.springboottutorial.id1212.entities.category.CategoryRepository;
-import com.example.springboottutorial.id1212.entities.chat.Chatroom;
-import com.example.springboottutorial.id1212.entities.chat.ChatroomRepository;
-import com.example.springboottutorial.id1212.entities.chat.MessageRepository;
+import com.example.springboottutorial.id1212.entities.chat.*;
 import com.example.springboottutorial.id1212.entities.user.User;
 import com.example.springboottutorial.id1212.entities.user.UserRepository;
-import com.example.springboottutorial.id1212.entities.chat.Message;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -26,21 +23,23 @@ public class UserController {
     private final ChatroomRepository chatroomRepository;
     private final CategoryRepository categoryRepository;
     private final ChatroomCategoryRepository chatroomCategoryRepository;
+    private final RoleRepository roleRepository;
     private MessageRepository messageRepository;
     private MessageUserDTO messageUserDTO;
-    //private ChatController chatController;
     private User user;
     private ChatroomCategory chatroomCategory;
 
     public UserController(ChatroomCategoryRepository chatroomCategoryRepository, CategoryRepository categoryRepository,
                           UserRepository userRepository, ChatroomUserRepository chatroomUserRepository,
-                          ChatroomRepository chatroomRepository, MessageRepository messageRepository) {
+                          ChatroomRepository chatroomRepository, MessageRepository messageRepository,
+                          RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.chatroomUserRepository = chatroomUserRepository;
         this.chatroomRepository = chatroomRepository;
         this.categoryRepository = categoryRepository;
         this.chatroomCategoryRepository = chatroomCategoryRepository;
         this.messageRepository = messageRepository;
+        this.roleRepository = roleRepository;
     }
 
     @PostMapping("/home")
@@ -87,7 +86,7 @@ public class UserController {
     }
 
     @GetMapping("/create-chatroom")
-    public String createChatroom1(Model model) {
+    public String createChatroom(Model model) {
         if(user != null){
             Chatroom chatroom = new Chatroom();
             ArrayList<Category> categories = (ArrayList<Category>) categoryRepository.findAll();
@@ -104,7 +103,7 @@ public class UserController {
     }
 
     @PostMapping("/create-chatroom-process")
-    public String processChatroom1(Model model, Chatroom chatroom, @RequestParam("categoryId") ArrayList<Integer> categoryIds) {
+    public String processChatroom(Model model, Chatroom chatroom, @RequestParam("categoryId") ArrayList<Integer> categoryIds) {
         if(user != null){
             chatroom.addUserCount(1);
             chatroomRepository.save(chatroom);
@@ -247,4 +246,49 @@ public class UserController {
         model.addAttribute("conversation", usernameConversations);
     }
 
+    @GetMapping("/chatroom/{id}/create-role")
+    public String createRole(Model model, @PathVariable Integer id) {
+        if(user != null){
+            Role role = new Role();
+            Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
+            model.addAttribute("role", role);
+            model.addAttribute("user", user);
+            model.addAttribute("chatroom", chatroom);
+            System.out.println("In createRole now!!---------------------------------------------------------------------------");
+
+            return "create-role";
+        }
+        else {
+            String message = "You are logged out";
+            model.addAttribute("message", message);
+        }
+        return "index";
+    }
+
+    @PostMapping("/chatroom/{id}/create-role-process")
+    public String processRole(Model model, @PathVariable Integer id, String role) { // Does not work when Role role as should
+        if(user != null){
+            Role chatRole = new Role();
+            chatRole.setRole(role);
+            roleRepository.save(chatRole);
+
+            Integer roleId = chatRole.getRoleId();
+            Integer userId = user.getUserId();
+
+            ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(user.getUserId(), id);
+
+            chatroomUserRepository.updateChatroomUserWithRoleId(roleId, id, userId);
+
+            Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
+            model.addAttribute("chatroom", chatroom);
+            model.addAttribute("role", role);
+
+            return "create-role-success";
+        }
+        else {
+            String message = "You are logged out";
+            model.addAttribute("message", message);
+        }
+        return "index";
+    }
 }

@@ -1,9 +1,12 @@
 package com.example.springboottutorial.id1212.entities.bridges.ChatroomUser;
 
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser.ChatroomUser;
+import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 
 public interface ChatroomUserRepository extends CrudRepository<ChatroomUser, Integer> {
@@ -19,4 +22,9 @@ public interface ChatroomUserRepository extends CrudRepository<ChatroomUser, Int
 
     @Query("SELECT c.userId FROM ChatroomUser c WHERE c.chatroomId = ?1")
     ArrayList<Integer> getAllUserIdsByChatroomId(Integer userId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE ChatroomUser c SET c.roleId = ?1 WHERE c.chatroomId = ?2 AND c.userId = ?3 ")
+    void updateChatroomUserWithRoleId(Integer roleId, Integer chatroomId, Integer userId);
 }
