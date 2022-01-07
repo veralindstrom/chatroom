@@ -224,6 +224,7 @@ public class UserController {
             if(chatroom != null){
                 prevConversation(model, id);
                 chatroomRole(model, id);
+                chatroomFiles(model, id);
 
                 Integer favoriteStatus = chatroomUserRepository.getFavoriteStatusByUserIdChatroomId(userId, id);
                 String favoriteString = "false";
@@ -259,6 +260,12 @@ public class UserController {
             model.addAttribute("message", message);
         }
         return "index";
+    }
+
+    private void chatroomFiles(Model model, Integer chatroomId) {
+        ArrayList<Message> fileMessages = messageRepository.findMessagesByChatroomIdAndFileIdIsNotNull(chatroomId);
+        model.addAttribute("fileMessages", fileMessages);
+        model.addAttribute("userRepo", userRepository);
     }
 
     private void chatroomRole(Model model, Integer chatroomId) {

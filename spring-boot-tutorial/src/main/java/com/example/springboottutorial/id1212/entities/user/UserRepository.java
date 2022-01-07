@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 public interface UserRepository extends CrudRepository<User, String> {
     User findUserByEmailAndPassword(String email,String password);
-
     User findUserByUserId(Integer id);
 
     @Query("SELECT u.username FROM User u WHERE u.userId = ?1")

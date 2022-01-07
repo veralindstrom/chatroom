@@ -10,15 +10,25 @@ public class ChatMessage {
     private String date;
     private Integer chatroomId;
     private Integer userId;
+    private String fileId;
 
     public enum MessageType {
         CHAT,
         JOIN,
-        LEAVE
+        LEAVE,
+        FILE
     }
 
     public MessageType getType() {
         return type;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
     }
 
     public void setType(MessageType type) {
