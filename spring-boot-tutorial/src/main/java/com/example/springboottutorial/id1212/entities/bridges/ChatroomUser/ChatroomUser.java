@@ -15,7 +15,7 @@ public class ChatroomUser {
     @Id
     private Integer roleId;
     private Integer admin;
-    private boolean favorite;
+    private Integer favorite;
 
     public Integer getChatroomId() {
         return chatroomId;
@@ -49,11 +49,11 @@ public class ChatroomUser {
         this.admin = admin;
     }
 
-    public boolean getFavorite(){
+    public Integer getFavorite(){
         return favorite;
     }
 
-    public void setFavorite(boolean favorite) {
+    public void setFavorite(Integer favorite) {
         this.favorite = favorite;
     }
 }

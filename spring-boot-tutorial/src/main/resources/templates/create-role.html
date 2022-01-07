@@ -9,7 +9,9 @@
     <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <style>
-
+        .container{
+            margin: 10% 10%;
+        }
     </style>
 </head>
 <body>
@@ -20,12 +22,15 @@
             <div style="display:none" th:text="${chatroom.id}"></div>
             <div style="display:none" th:text="${chatroom.name}"></div>
             <div style="display:none" th:text="${user.username}"></div>
-            <!--div style="display:none" th:text="${role}"></div-->
-            <h3>Create a Role in Chatroom </h3>
-            <h3 th:text="${chatroom.name}"></h3>
-            <label for="roleName" class="col-sm-2 col-form-label">Your Desired Role</label>
-            <div class="col-md-6">
-                <input class="form-control" id="roleName" th:field="*{role}" required minlength="1">
+            <div>
+                <h3 style="display:inline-block">Create a Role in Chatroom </h3>
+                <h3 style="display:inline-block" th:text="${chatroom.name}"></h3>
+            </div>
+            <div style="grid-template-column: auto auto; margin-top:20px;" >
+                <label style="width: 100%;"for="roleName" class="col-sm-2 col-form-label">Your Desired Role</label>
+                <div style="margin-top:10px;" class="col-md-6">
+                    <input class="form-control" id="roleName" th:field="*{role}" required minlength="1">
+                </div>
             </div>
         </div>
         <button type="submit" class="btn btn-primary">Create</button>

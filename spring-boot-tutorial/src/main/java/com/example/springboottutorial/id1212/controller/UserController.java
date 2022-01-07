@@ -48,6 +48,7 @@ public class UserController {
         user = userRepository.findUserByEmailAndPassword(email, password);
         if(user != null){
             model.addAttribute("user", user);
+            Integer userId = user.getUserId();
             home(model);
             return "home";
         }
@@ -76,14 +77,25 @@ public class UserController {
         ArrayList<ChatroomUser> chatroomUser = chatroomUserRepository.findChatroomUsersByUserId(user.getUserId());
         ArrayList<Chatroom> chatrooms = new ArrayList<>();
         ArrayList<Chatroom> publicChatrooms = chatroomRepository.getAllPublicId();
+        ArrayList<Integer> favChatrooms = chatroomUserRepository.getAllChatroomIdsForFavoriteChatroomByUserId(user.getUserId());
+        ArrayList<Chatroom> favoriteChatrooms = new ArrayList<>();
+
+        for(Integer favChat : favChatrooms) {
+            Chatroom fcr = chatroomRepository.findChatRoomByChatroomId(favChat);
+            favoriteChatrooms.add(fcr); // / Users favorite chatrooms
+        }
         for(ChatroomUser cu : chatroomUser) {
             Integer chatId = cu.getChatroomId();
             Chatroom cr = chatroomRepository.findChatRoomByChatroomId(chatId);
-            chatrooms.add(cr); // / Chatroom the user is part of
-            publicChatrooms.removeAll(chatrooms);
+            chatrooms.add(cr);   // Chatroom the user is part of
         }
+
+        publicChatrooms.removeAll(chatrooms); // Public chatrooms, user is not in
+        chatrooms.removeAll(favoriteChatrooms); // Removing favorite from all chatrooms, user is in
+
         model.addAttribute("chatroom", chatrooms);
         model.addAttribute("pubchatroom", publicChatrooms);
+        model.addAttribute("favchatroom", favoriteChatrooms);
     }
 
     @GetMapping("/create-chatroom")
@@ -153,7 +165,12 @@ public class UserController {
     @GetMapping("/leave-chatroom/{id}")
     public String leaveChatroom(@PathVariable Integer id, Model model){
         ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(user.getUserId(), id);
+       /* Integer roleId = chatroomUserRepository.getRoleIdByUserIdChatroomId(user.getUserId(), id);
+        Role role = roleRepository.findRoleByRoleId(roleId);
+        roleRepository.delete(role);*/
+
         chatroomUserRepository.delete(chatroomUser);
+        System.out.println("AFTER DELETE CHATROOM USER! ----------------------------------------");
         Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
         ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByChatroomId(id);
         if(chatroomUser.getAdmin() == 1) { // TRUE
@@ -163,8 +180,14 @@ public class UserController {
                     chatroomCategoryRepository.delete(cc);
                 }
             }
-            /*if chatroom had messages those needs to be removed too (for later)*/
-
+            /*if chatroom had messages those needs to be removed too */
+            ArrayList<Integer> messageIdsInChatroom = messageRepository.getAllMessageIdsByChatroomId(id);
+            if(messageIdsInChatroom.size() > 0) {
+                for(Integer mId : messageIdsInChatroom){
+                    Message m = messageRepository.findMessageByMessageId(mId);
+                    messageRepository.delete(m);
+                }
+            }
             /*deleting chatroom*/
             chatroomRepository.delete(chatroom);
         }
@@ -192,7 +215,8 @@ public class UserController {
                 chatroomUser = new ChatroomUser();
                 chatroomUser.setChatroomId(id);
                 chatroomUser.setUserId(userId);
-                chatroomUser.setAdmin(0); // FALSE
+                Integer adminValue = 0;
+                chatroomUser.setAdmin(adminValue); // FALSE
                 chatroomUserRepository.save(chatroomUser);
                 return "redirect:/chatroom/{id}";
             }
@@ -200,6 +224,17 @@ public class UserController {
             if(chatroom != null){
                 prevConversation(model, id);
                 chatroomRole(model, id);
+
+                Integer favoriteStatus = chatroomUserRepository.getFavoriteStatusByUserIdChatroomId(userId, id);
+                String favoriteString = "false";
+                if(favoriteStatus != null) {
+                    System.out.println("Favorite Status USER CONTROLLER = " + favoriteStatus + "--------------------------------------------------------------------------");
+                    if(favoriteStatus.equals(1)) {
+                        favoriteString = "true";
+                    }
+                }
+                model.addAttribute("favString", favoriteString); // must have for js code, not work with bool or number
+                model.addAttribute("favorite", favoriteStatus);
 
                 Integer roleId = chatroomUser.getRoleId();
                 if(roleId != null) {
@@ -253,16 +288,6 @@ public class UserController {
                 userRole.setUsername(username);
                 userRoles.add(userRole);
             }
-
-         /*   if(admin == 1) { // TRUE
-                // place first in arraylists of userRoles
-                int index = userRoles.indexOf(userRole);
-                if(index != 0) {
-                    userRoles.remove(index);
-                    adminUser.setUsername();
-                    //userRoles.add(0, userRole);
-                }
-            }*/
         }
         model.addAttribute("adminuser", adminUser);
         model.addAttribute("userroles", userRoles);
@@ -299,12 +324,15 @@ public class UserController {
     @GetMapping("/chatroom/{id}/create-role")
     public String createRole(Model model, @PathVariable Integer id) {
         if(user != null){
+            Integer currentRole = chatroomUserRepository.getRoleIdByUserIdChatroomId(user.getUserId(), id);
+            if (currentRole != null) {
+                chatroomUserRepository.updateChatroomUserWithRoleId(null, id, user.getUserId());
+            }
             Role role = new Role();
             Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
             model.addAttribute("role", role);
             model.addAttribute("user", user);
             model.addAttribute("chatroom", chatroom);
-            System.out.println("In createRole now!!---------------------------------------------------------------------------");
 
             return "create-role";
         }
@@ -325,7 +353,7 @@ public class UserController {
             Integer roleId = chatRole.getRoleId();
             Integer userId = user.getUserId();
 
-            ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(user.getUserId(), id);
+            //ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(user.getUserId(), id);
 
             chatroomUserRepository.updateChatroomUserWithRoleId(roleId, id, userId);
 

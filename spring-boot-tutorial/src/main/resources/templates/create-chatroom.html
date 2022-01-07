@@ -18,6 +18,9 @@
 <div class="container">
     <form th:action="@{/create-chatroom-process}" th:object="${chatroom}"
           method="post" style="max-width: 600px; margin: 0 auto;">
+        <div>
+            <h3 style="margin-bottom:20px;">Create a Chatroom</h3>
+        </div>
         <div class="row mb-3">
             <label for="chatroomName" class="col-sm-2 col-form-label">Chatroom Name</label>
             <div class="col-md-6">

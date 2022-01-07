@@ -17,4 +17,7 @@ public interface MessageRepository extends CrudRepository<Message, Integer> {
 
     @Query("select m.userId from Message m where m.messageId = ?1")
     Integer getUserIdByMessageId(Integer messageId);
+
+    @Query("SELECT m.messageId FROM Message m WHERE m.chatroomId = ?1")
+    ArrayList<Integer> getAllMessageIdsByChatroomId(Integer chatroomId);
 }

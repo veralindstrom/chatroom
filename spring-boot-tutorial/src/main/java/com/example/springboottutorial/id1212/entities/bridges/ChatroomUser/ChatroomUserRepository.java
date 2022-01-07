@@ -33,8 +33,19 @@ public interface ChatroomUserRepository extends CrudRepository<ChatroomUser, Int
     @Query("SELECT c.admin FROM ChatroomUser c WHERE c.userId = ?1 AND c.chatroomId = ?2")
     Integer getAdminStatusByUserIdChatroomId(Integer userId, Integer chatroomId);
 
+    @Query("SELECT c.favorite FROM ChatroomUser c WHERE c.userId = ?1 AND c.chatroomId = ?2")
+    Integer getFavoriteStatusByUserIdChatroomId(Integer userId, Integer chatroomId);
+
+    @Query("SELECT c.chatroomId FROM ChatroomUser c WHERE c.favorite = 1 AND c.userId = ?1")
+    ArrayList<Integer> getAllChatroomIdsForFavoriteChatroomByUserId(Integer userId);
+
     @Modifying
     @Transactional
-    @Query("UPDATE ChatroomUser c SET c.roleId = ?1 WHERE c.chatroomId = ?2 AND c.userId = ?3 ")
+    @Query("UPDATE ChatroomUser c SET c.roleId = ?1 WHERE c.chatroomId = ?2 AND c.userId = ?3")
     void updateChatroomUserWithRoleId(Integer roleId, Integer chatroomId, Integer userId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE ChatroomUser c SET c.favorite = ?1 WHERE c.chatroomId = ?2 AND c.userId = ?3")
+    void updateChatroomUserWithFavoriteStatus (Integer favorite, Integer chatroomId, Integer userId);
 }
