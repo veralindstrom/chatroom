@@ -46,6 +46,12 @@
             <input class="form-check-input" type="checkbox" id="gridCheck1">
         </div>
     </div>
+    <div class="row" style="text-align: right;">
+        <h5 style="text-align: left;">Categories: </h5>
+        <ul class="list-group list-group-horizontal" th:each="category: ${categories}">
+            <li class="list-group-item" th:text="${category.category}"></li>
+        </ul>
+    </div>
     <div class="row">
         <div id="chat-page" class="col">
             <div class="chat-container">
@@ -103,6 +109,7 @@
                 </li>
             </ul>
             <ul>
+                <h4>Members</h4>
                 <li th:each="userrole : ${userroles}">
                     <span class="list-group-item" th:text="${userrole.username}"></span>
                     <span class="list-group-item" th:text="${userrole.role}"></span>
@@ -113,14 +120,18 @@
                 <label class="col-4 col-form-label"> Want a role? </label>
                 <button type="submit" class="btn">Create</button>
             </form>
+
+            <ul>
+                <h4>Files</h4>
+                <li th:each="fileMessage : ${fileMessages}">
+                    <span class="list-group-item" th:text="${userRepo.getUsername(fileMessage.userId)}"></span>
+                    <span class="list-group-item" th:text="${fileMessage.date}"></span>
+                    <a class="list-group-item"  th:href="${fileMessage.message}" target='_blank' th:text="${fileMessage.message}"></a>
+                </li>
+            </ul>
         </div>
     </div>
-    <div class="row" style="text-align: right;">
-        <h5 style="text-align: left;">Categories: </h5>
-        <ul class="list-group list-group-horizontal" th:each="category: ${categories}">
-            <li class="list-group-item" th:text="${category.category}"></li>
-        </ul>
-    </div>
+
 </div>
 <div class="container text-center">
     <h4><a th:href="@{/home}">Back to Chatroom Home</a></h4>
@@ -265,12 +276,15 @@
         var chatroomId = document.querySelector('#chatId').textContent;
         var userId = document.querySelector('#userId').textContent;
         dateTime = new Date().toLocaleString('sv-SE');
+        var type = 'CHAT';
+        if(fileId)
+            type = 'FILE';
 
         if(messageContent && stompClient) {
             var chatMessage = {
                 sender: username,
                 content: messageInput.value,
-                type: 'CHAT',
+                type: type,
                 date: dateTime,
                 chatroomId: chatroomId,
                 userId : userId,
@@ -311,12 +325,19 @@
             messageElement.appendChild(usernameElement);
         }
 
-        var textElement = document.createElement('p');
-        var messageText = document.createTextNode(message.content); // p - tag for message content
-        textElement.appendChild(messageText);
+        const textElement = document.createElement('p');
+        if(message.type === 'FILE'){
+            const fileUrlElement = document.createElement('a');
+            fileUrlElement.href = message.content;
+            fileUrlElement.target = "'_blank'";
+            fileUrlElement.text = message.content;
+            textElement.appendChild(fileUrlElement);
+        } else {
+            const messageText = document.createTextNode(message.content);
+            textElement.appendChild(messageText);
+        } // p - tag for message content
 
         messageElement.appendChild(textElement);
-
         messageArea.appendChild(messageElement);
         messageArea.scrollTop = messageArea.scrollHeight;  // all inserted into ul tag with id messageArea
     }

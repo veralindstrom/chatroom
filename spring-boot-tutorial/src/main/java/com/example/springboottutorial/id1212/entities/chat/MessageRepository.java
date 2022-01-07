@@ -11,6 +11,7 @@ public interface MessageRepository extends CrudRepository<Message, Integer> {
     Message findMessageByUserId(Integer userId);
     Message findMessageByDate(Date date);
     Message findMessageByChatroomId(Integer chatroomId);
+    ArrayList<Message> findMessagesByChatroomIdAndFileIdIsNotNull(Integer chatroomId);
 
     @Query("select m from Message m where m.chatroomId = ?1 order by m.date ASC")
     ArrayList<Message> getAllMessagesInChatroom(Integer chatroomId);
