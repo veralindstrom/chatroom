@@ -1,4 +1,4 @@
-package com.example.springboottutorial.websocket;
+package com.example.springboottutorial.id1212.websocket;
 
 import com.example.springboottutorial.id1212.chat.ChatMessage;
 import org.slf4j.Logger;

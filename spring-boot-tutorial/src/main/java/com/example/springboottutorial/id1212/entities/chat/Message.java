@@ -11,7 +11,7 @@ public class Message {
     private Integer messageId;
     private String message;
     private Date date;
-    private Integer fileId;
+    private String fileId;
     private Integer userId;
     private Integer chatroomId;
 
@@ -39,11 +39,11 @@ public class Message {
         this.date = date;
     }
 
-    public Integer getfileId(){
+    public String getFileId(){
         return fileId;
     }
 
-    public void setfileId(Integer fileId){
+    public void setFileId(String fileId){
         this.fileId = fileId;
     }
 

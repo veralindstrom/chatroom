@@ -1,22 +1,27 @@
-package com.example.springboottutorial.id1212.entities.bridges;
+package com.example.springboottutorial.id1212.entities.bridges.DBFileUser;
+
+import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser.ChatroomUserId;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Table;
 import java.io.Serializable;
 
 @Entity
 @Table(name="user_file")
-public class FileUser implements Serializable {
+@IdClass(DBFileUserId.class)
+public class DBFileUser implements Serializable {
     @Id
     private Integer userId;
-    private Integer fileId;
+    @Id
+    private String fileId;
 
-    public void setFileId(Integer fileId) {
+    public void setFileId(String fileId) {
         this.fileId = fileId;
     }
 
-    public Integer getFileId() {
+    public String getFileId() {
         return fileId;
     }
 

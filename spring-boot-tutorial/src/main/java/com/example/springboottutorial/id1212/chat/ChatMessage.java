@@ -10,6 +10,7 @@ public class ChatMessage {
     private String date;
     private Integer chatroomId;
     private Integer userId;
+    private String fileId;
 
     public enum MessageType {
         CHAT,
@@ -19,6 +20,14 @@ public class ChatMessage {
 
     public MessageType getType() {
         return type;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
     }
 
     public void setType(MessageType type) {

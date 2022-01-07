@@ -8,6 +8,11 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
+        .upload-container{
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
@@ -48,11 +53,12 @@
                     Connecting...
                 </div>
                 <ul th:each="conv : ${conversation}">
-                    <li>
+                    <li th:switch="${conv.message.fileId != null}">
                         <span class="list-group-item" th:text="${conv.message.userId}"></span>
                         <span class="list-group-item" th:text="${conv.username}"></span>
                         <span class="list-group-item" th:text="${conv.message.date}"></span>
-                        <p class="list-group-item" th:text="${conv.message.message}"></p>
+                        <a th:case="${true}" th:href="${conv.message.message}" target='_blank' th:text="${conv.message.message}"></a>
+                        <p th:case="*" class="list-group-item" th:text="${conv.message.message}"></p>
                     </li>
                 </ul>
                 <ul id="messageArea">
@@ -63,6 +69,7 @@
                         <div class="input-group clearfix">
                             <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control"/>
                             <button type="submit" class="primary">Send</button>
+                            <button id="uploadBtn" class="primary">Upload File</button>
                         </div>
                     </div>
                 </form>
@@ -72,6 +79,21 @@
                     <button type="submit" class="accent username-submit">Stop chatting</button>
                 </div>
             </form>
+            <div class="upload-container" id="upload-container">
+                <div class="upload-content">
+                    <div class="single-upload">
+                        <h3>Upload Single File</h3>
+                        <form id="singleUploadForm" name="singleUploadForm">
+                            <input id="singleFileUploadInput" type="file" name="file" class="file-input" required />
+                            <button type="submit" class="primary submit-btn">Submit</button>
+                        </form>
+                        <div class="upload-response">
+                            <div id="singleFileUploadError"></div>
+                            <div id="singleFileUploadSuccess"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="col">
             <ul style="background-color: cornflowerblue">
@@ -110,8 +132,55 @@
 <script>
     'use strict';
 
-    var usernamePage = document.querySelector('#username-page');
-    var chatPage = document.querySelector('#chat-page');
+    /* START OF FILE UPLOAD/DOWNLOAD CODE */
+    var messageInput = document.querySelector('#message');
+    var userId = document.querySelector('#userId').textContent;
+
+    var singleUploadForm = document.querySelector('#singleUploadForm');
+    var singleFileUploadInput = document.querySelector('#singleFileUploadInput');
+    var singleFileUploadError = document.querySelector('#singleFileUploadError');
+    var singleFileUploadSuccess = document.querySelector('#singleFileUploadSuccess');
+
+    var fileId = null;
+
+    function uploadSingleFile(file) {
+        var formData = new FormData();
+        formData.append("file", file);
+        formData.append("userId", userId);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/uploadFile");
+
+        xhr.onload = function() {
+            console.log(xhr.responseText);
+            var response = JSON.parse(xhr.responseText);
+            if(xhr.status == 200) {
+                singleFileUploadError.style.display = "none";
+                singleFileUploadSuccess.innerHTML = "<p>File Uploaded Successfully with id: " + response.fileId + ".</p><p>DownloadUrl : <a href='" + response.fileDownloadUri + "' target='_blank'>" + response.fileDownloadUri + "</a></p>";
+                fileId = response.fileId;
+                messageInput.value = response.fileDownloadUri;
+                //messageInput.value = "<a href='" + response.fileDownloadUri + "' target='_blank'>" + response.fileDownloadUri + "</a>";
+                singleFileUploadSuccess.style.display = "block";
+            } else {
+                singleFileUploadSuccess.style.display = "none";
+                singleFileUploadError.innerHTML = (response && response.message) || "Some Error Occurred";
+            }
+        }
+
+        xhr.send(formData);
+    }
+
+    singleUploadForm.addEventListener('submit', function(event){
+        var files = singleFileUploadInput.files;
+        if(files.length === 0) {
+            singleFileUploadError.innerHTML = "Please select a file";
+            singleFileUploadError.style.display = "block";
+        }
+        uploadSingleFile(files[0]);
+        event.preventDefault();
+    }, true);
+
+    /* START OF CHAT CODE */
     var usernameForm = document.querySelector('#usernameForm');
     var messageForm = document.querySelector('#messageForm');
     var messageInput = document.querySelector('#message');
@@ -119,6 +188,8 @@
     var connectingElement = document.querySelector('#connecting');
     var startForm = document.querySelector('#startForm');
     var leaveForm = document.querySelector('#leaveForm');
+    var uploadFrom = document.querySelector('#upload-container');
+    var uploadBtn = document.querySelector('#uploadBtn');
 
     var stompClient = null;
     var username = null;
@@ -128,6 +199,13 @@
         '#2196F3', '#32c787', '#00BCD4', '#ff5652',
         '#ffc107', '#ff85af', '#FF9800', '#39bbb0'
     ];
+
+    uploadBtn.addEventListener('click', showUploadContainer, true);
+
+    function showUploadContainer(event) {
+        uploadFrom.style.display = "block";
+        event.preventDefault();
+    }
 
     function connect(event) {
         messageForm.style.display = "block";  // <-- Set it to block to display
@@ -182,6 +260,7 @@
     }
 
     function sendMessage(event) {
+        uploadFrom.style.display = "none";
         var messageContent = messageInput.value.trim();
         var chatroomId = document.querySelector('#chatId').textContent;
         var userId = document.querySelector('#userId').textContent;
@@ -194,11 +273,13 @@
                 type: 'CHAT',
                 date: dateTime,
                 chatroomId: chatroomId,
-                userId : userId
+                userId : userId,
+                fileId: fileId
             };
             stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
             messageInput.value = '';
         }
+        fileId = null;
         event.preventDefault();
     }
 
@@ -250,9 +331,9 @@
         return colors[index];
     }
 
-    usernameForm.addEventListener('submit', connect, true)
-    messageForm.addEventListener('submit', sendMessage, true)
-    leaveForm.addEventListener('submit', leave, true)
+    usernameForm.addEventListener('submit', connect, true);
+    messageForm.addEventListener('submit', sendMessage, true);
+    leaveForm.addEventListener('submit', leave, true);
 
 </script>
 </html>

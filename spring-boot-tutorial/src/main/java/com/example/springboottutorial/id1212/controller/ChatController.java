@@ -1,7 +1,12 @@
 package com.example.springboottutorial.id1212.controller;
 
 import com.example.springboottutorial.id1212.chat.ChatMessage;
+import com.example.springboottutorial.id1212.entities.bridges.DBFileUser.DBFileUser;
+import com.example.springboottutorial.id1212.entities.bridges.DBFileUser.DBFileUserRepository;
+import com.example.springboottutorial.id1212.entities.file.DBFileRepository;
+import com.example.springboottutorial.id1212.entities.user.User;
 import com.example.springboottutorial.id1212.entities.user.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -19,6 +24,13 @@ import java.util.Date;
 public class ChatController {
     private final MessageRepository messageRepository;
 
+    @Autowired
+    private DBFileRepository dbFileRepository;
+    @Autowired
+    private DBFileUserRepository dbFileUserRepository;
+    @Autowired
+    private UserRepository userRepository;
+
     public ChatController(MessageRepository messageRepository) {
         this.messageRepository = messageRepository;
     }
@@ -30,6 +42,7 @@ public class ChatController {
         String date = chatMessage.getDate(); // date is correct
         Integer chatroomId = chatMessage.getChatroomId();
         Integer userId = chatMessage.getUserId(); // if username is not unique
+        String fileId = chatMessage.getFileId();
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date newDate = formatter.parse(date);
@@ -39,8 +52,15 @@ public class ChatController {
         message.setUserId(userId);
         message.setchatroomId(chatroomId);
         message.setDate(newDate);
-
+        message.setFileId(fileId);
         messageRepository.save(message);
+
+        if(fileId != null) {
+            DBFileUser dbFileUser = new DBFileUser();
+            dbFileUser.setFileId(fileId);
+            dbFileUser.setUserId(userId);
+            dbFileUserRepository.save(dbFileUser);
+        }
         return chatMessage;
     }
 
