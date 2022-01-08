@@ -74,7 +74,7 @@ public class UserController {
 
     private void home(Model model) {
         ArrayList<ChatroomUser> chatroomUser = chatroomUserRepository.findChatroomUsersByUserId(user.getUserId());
-        ArrayList<Chatroom> chatrooms = new ArrayList<>();
+        ArrayList<Chatroom> chatrooms = new ArrayList<>(); // Remaining in Your chatrooms
         ArrayList<Chatroom> publicChatrooms = chatroomRepository.getAllPublicId();
         ArrayList<Integer> favChatrooms = chatroomUserRepository.getAllChatroomIdsForFavoriteChatroomByUserId(user.getUserId());
         ArrayList<Chatroom> favoriteChatrooms = new ArrayList<>();
@@ -230,7 +230,7 @@ public class UserController {
                 }
             }
         }
-        if (fail != 0 && success != 0) { // Not fail or succedd completely
+        if (fail != 0 && success != 0) { // Not fail or succeed completely
             model.addAttribute("failed", failedEmails);
             model.addAttribute("success", successfulEmails);
         }
