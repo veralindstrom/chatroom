@@ -105,6 +105,16 @@ public class ChatController {
             Integer falseStatus = 0;
             chatroomUserRepository.updateChatroomUserWithFavoriteStatus(falseStatus, chatroomId, userId);
         }
+        else {
+            Integer currentStatus = chatroomUserRepository.getFavoriteStatusByUserIdChatroomId(userId, chatroomId);
+            if(currentStatus.equals(1)) {
+                chatMessage.setContent("Favorite");
+            }
+            if (currentStatus.equals(0)) {
+                chatMessage.setContent("RemoveFavorite");
+            }
+
+        }
 
         return chatMessage;
     }
