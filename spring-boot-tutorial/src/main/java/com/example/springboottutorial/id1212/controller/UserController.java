@@ -11,6 +11,8 @@ import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser.Chatr
 import com.example.springboottutorial.id1212.entities.category.Category;
 import com.example.springboottutorial.id1212.entities.category.CategoryRepository;
 import com.example.springboottutorial.id1212.entities.chat.*;
+import com.example.springboottutorial.id1212.entities.file.DBFile;
+import com.example.springboottutorial.id1212.entities.file.DBFileRepository;
 import com.example.springboottutorial.id1212.entities.user.User;
 import com.example.springboottutorial.id1212.entities.user.UserRepository;
 import org.springframework.stereotype.Controller;
@@ -28,13 +30,14 @@ public class UserController {
     private final ChatroomCategoryRepository chatroomCategoryRepository;
     private final RoleRepository roleRepository;
     private MessageRepository messageRepository;
+    private DBFileRepository fileRepository;
     private User user;
     private ChatroomCategory chatroomCategory;
 
     public UserController(ChatroomCategoryRepository chatroomCategoryRepository, CategoryRepository categoryRepository,
                           UserRepository userRepository, ChatroomUserRepository chatroomUserRepository,
                           ChatroomRepository chatroomRepository, MessageRepository messageRepository,
-                          RoleRepository roleRepository) {
+                          RoleRepository roleRepository, DBFileRepository fileRepository) {
         this.userRepository = userRepository;
         this.chatroomUserRepository = chatroomUserRepository;
         this.chatroomRepository = chatroomRepository;
@@ -42,6 +45,7 @@ public class UserController {
         this.chatroomCategoryRepository = chatroomCategoryRepository;
         this.messageRepository = messageRepository;
         this.roleRepository = roleRepository;
+        this.fileRepository = fileRepository;
     }
 
     @PostMapping("/home")
@@ -369,6 +373,8 @@ public class UserController {
 
     private void chatroomFiles(Model model, Integer chatroomId) {
         ArrayList<Message> fileMessages = messageRepository.findMessagesByChatroomIdAndFileIdIsNotNull(chatroomId);
+
+        model.addAttribute("fileRepository", fileRepository);
         model.addAttribute("fileMessages", fileMessages);
         model.addAttribute("userRepo", userRepository);
     }

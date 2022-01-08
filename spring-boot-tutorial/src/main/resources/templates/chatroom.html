@@ -9,24 +9,153 @@
     <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <style>
+        body{
+            background-color: #F7F9FF;
+        }
+
+        .chatroom{
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .chatroom-header{
+            padding: 0 0.5rem;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            background-color: #F7F9FF;
+            -webkit-box-shadow: 0px 4px 6px -4px rgba(87,88,105,0.73);
+            box-shadow: 0px 4px 6px -4px rgba(87,88,105,0.73);
+            margin-bottom: 8px;
+        }
+
+        .categories-favorite-header{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-evenly;
+        }
+
+        .category-list{
+            margin: 0.3rem 1rem;
+            padding: 0 1rem;
+            width: 50%;
+            overflow-x: scroll;
+        }
+
+        #category-list-item{
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .favorite{}
+
+        .star{
+            background: none;
+            color: inherit;
+            border: none;
+            padding: 0;
+            font: inherit;
+            cursor: pointer;
+            outline: inherit;
+        }
+
+        img{
+            width: inherit;
+        }
+
+        .date-span{
+            color: #777777;
+            font-size: 80%;
+        }
+
+        .username-span{
+            font-weight: bold;
+        }
+
+        .main-chatroom-container{
+            display: grid;
+            grid-template-columns: 80% 20%;
+            grid-template-rows: 85vh;
+            grid-gap: 1%;
+            margin: 0 2%;
+        }
+
+        .chat-container{
+            background-color: white;
+            height: 100%;
+            border: 1px solid grey;
+            padding-top: 1%;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-messages{
+            overflow-y: scroll;
+        }
+
+        .list-message{
+            border: none;
+        }
+
+        .list-sidebar{
+            display: grid;
+            grid-template-columns: 100%;
+            grid-template-rows: 40% 10% 50%;
+        }
+
+        .admin{
+            display: flex;
+            flex-direction: row;
+        }
+
+        .role{
+            display: block;
+        }
+
+        .role-btn{
+            border: none;
+            padding: 9px;
+        }
+
+        .role-btn:hover{
+            color: lightgrey;
+        }
+
+        #fileList{
+            overflow-y: scroll;
+        }
+
+        .file-item-link{
+            overflow-x: scroll;
+        }
+
+        .messageFooter{
+            margin-top: auto;
+        }
         .upload-container{
             display: none;
+        }
+
+        .footer{
+            top: auto;
+            bottom: 0;
         }
     </style>
 </head>
 <body onload="connect();">
 <!--body-->
+<div class="chatroom">
 
-<div id="username-page">
+<div id="username-page" class="chatroom-header" >
     <div class="username-page-container">
-        <h1 class="title">Chatroom </h1>
         <h1 style="display:none" class="title" id="chatId" th:text="${chatroomId}"></h1>
         <h1 style="display:none" class="title" id="favoriteStatus" th:text="${favorite}"></h1>
         <h1 style="display:none" class="title" id="favoriteString" th:text="${favString}"></h1>
         <h1 class="title" th:text="${chatroom.name}"></h1>
 
         <div style="display:none" id="userId" th:text="${user.userId}"></div>
-        <form id="usernameForm" name="usernameForm">
+        <form style="display:none" id="usernameForm" name="usernameForm">
             <div class="form-group">
                 <!--div class="form-control" th:text="${user.username}"></div-->
                 <input type="text" id="name" th:value="${user.username}" autocomplete="on" class="form-control" disabled/>
@@ -36,121 +165,109 @@
             </div>
         </form>
     </div>
-
-
-    <div th:if="${favorite}" id="favoriteChecked" class="chat-header col form-group" style="text-align: right; display:block;">
-        <div class="accent username-submit">Favorite</div>
-    </div>
-    <form id="favoriteForm" class="chat-header col" style="text-align: right; display:none;">
-        <div id="favoriteButton" class="form-group" style="display:block;">
-            <button type="submit" class="accent username-submit">Favorite</button>
+        <div class="category-list">
+            <ul class="list-group list-group-horizontal">
+                <li th:each="category: ${categories}" class="list-group-item" id="category-list-item" th:text="${'#' + category.category}"></li>
+            </ul>
         </div>
-    </form>
-    <form id="removeFavoriteForm" class="chat-header col" style="text-align: right; display:none;">
-        <div id="removeFavoriteButton" class="form-group" style="display:block;">
-            <button type="submit" class="accent username-submit">Remove from Favorite</button>
+        <div class="favorite">
+            <div th:if="${favorite}" id="favoriteChecked" class="chat-header col form-group" style="text-align: right; display:block;">
+                <div class="accent username-submit" style="display: none;">Favorite</div>
+            </div>
+            <form id="favoriteForm" class="chat-header col" style="text-align: right; display:none;">
+                <div id="favoriteButton" class="form-group" style="display:block;">
+                    <button type="submit" class="star accent username-submit"><img src="https://img.icons8.com/color/48/000000/star--v1.png"/></button>
+                </div>
+            </form>
+            <form id="removeFavoriteForm" class="chat-header col" style="text-align: right; display:none;">
+                <div id="removeFavoriteButton" class="form-group" style="display:block;">
+                    <button type="submit" class=" star accent username-submit"><img src="https://img.icons8.com/fluency/48/000000/star.png"/></button>
+                </div>
+            </form>
         </div>
-    </form>
 </div>
 
-
-
-
-<div class="container">
-    <div class="row">
-        <div class="chat-header col">
-            <h2 th:text="${chatroom.name}"></h2>
-        </div>
-    </div>
-    <div class="row" style="text-align: right;">
-        <h5 style="text-align: left;">Categories: </h5>
-        <ul class="list-group list-group-horizontal" th:each="category: ${categories}">
-            <li class="list-group-item" th:text="${category.category}"></li>
-        </ul>
-    </div>
-    <div class="row">
+<div class="main-chatroom-container">
         <div id="chat-page" class="col">
             <div class="chat-container">
-                <div id="connecting" style="display:none">
-                    Connecting...
-                </div>
-                <ul th:each="conv : ${conversation}">
-                    <li th:switch="${conv.message.fileId != null}">
-                        <span class="list-group-item" th:text="${conv.message.userId}"></span>
-                        <span class="list-group-item" th:text="${conv.username}"></span>
-                        <span class="list-group-item" th:text="${conv.message.date}"></span>
-                        <a th:case="${true}" th:href="${conv.message.message}" target='_blank' th:text="${conv.message.message}"></a>
-                        <p th:case="*" class="list-group-item" th:text="${conv.message.message}"></p>
-                    </li>
-                </ul>
-                <ul id="messageArea">
+                <div class="chat-messages" id="chat-messages-id">
+                    <div id="connecting" style="display:none">
+                        Connecting...
+                    </div>
+                    <ul th:each="conv : ${conversation}">
+                        <li th:switch="${conv.message.fileId != null}" class="list-group-item list-message">
+                            <span class="username-span" th:text="${conv.username}"></span>
+                            <span class="date-span" th:text="${conv.message.date}"></span>
+                            <p th:case="${true}"><a th:href="${conv.message.message}" target='_blank' th:text="${fileRepository.findDBFileByFileId(conv.message.fileId).getFileName()}"></a></p>
+                            <p th:case="*" th:text="${conv.message.message}"></p>
+                        </li>
+                    </ul>
+                    <ul id="messageArea">
 
-                </ul>
-                <form id="messageForm" name="messageForm" style="display:none">
-                    <div class="form-group">
-                        <div class="input-group clearfix">
-                            <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control"/>
-                            <button id="sendMsgBtn" type="submit" class="primary">Send</button>
-                            <button id="uploadBtn" class="primary">Upload File</button>
+                    </ul>
+                </div>
+                <div class="messageFooter">
+                    <form id="messageForm" name="messageForm" style="display:none">
+                        <div class="form-group">
+                            <div class="input-group clearfix">
+                                <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control"/>
+                                <button id="sendMsgBtn" type="submit" class="primary btn btn-outline-secondary">Send</button>
+                                <button id="uploadBtn" class="primary btn btn-outline-secondary">Upload File</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="upload-container" id="upload-container">
+                        <div class="upload-content">
+                            <div class="single-upload">
+                                <form id="singleUploadForm" name="singleUploadForm" class="input-group">
+                                    <input id="singleFileUploadInput" type="file" name="file" class="file-input form-control" aria-describedby="inputGroupFileAddon04" aria-label="Upload" required />
+                                    <button type="submit" class="submit-btn btn btn-secondary">Send</button>
+                                </form>
+                                <div class="upload-response">
+                                    <div id="singleFileUploadError"></div>
+                                    <div id="singleFileUploadSuccess"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="list-sidebar">
+            <ul class="list-group">
+                <h4>Members</h4>
+                <li class="list-group-item">
+                    <div class="admin">
+                        <span class="username-span" th:text="${adminuser.username}"></span>
+                        <img style="height: 24px;" src="https://img.icons8.com/color/48/000000/crown.png"/>
+                    </div>
+                    <span class="role" th:text="${adminuser.role}"></span>
+                </li>
+                <li th:each="userrole : ${userroles}" class="list-group-item">
+                    <span class="username-span" th:text="${userrole.username}"></span>
+                    <span class="role" th:text="${userrole.role}"></span>
+                </li>
+            </ul>
+            <div>
+                <form th:action="@{/chatroom/{id}/create-role(id=${chatroom.id})}" method="GET" style="max-width: 600px;">
+                    <label class="col-form-label"> Want a role? </label>
+                    <button type="submit" class="btn role-btn">Create</button>
                 </form>
             </div>
-            <div class="upload-container" id="upload-container">
-                <div class="upload-content">
-                    <div class="single-upload">
-                        <h5>Upload File</h5>
-                        <form id="singleUploadForm" name="singleUploadForm">
-                            <input id="singleFileUploadInput" type="file" name="file" class="file-input" required />
-                            <button type="submit" class="primary submit-btn">Submit</button>
-                        </form>
-                        <div class="upload-response">
-                            <div id="singleFileUploadError"></div>
-                            <div id="singleFileUploadSuccess"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <form id="leaveForm" name="usernameForm" style="display:none">
-                <div class="form-group">
-                    <button type="submit" class="accent username-submit">Stop chatting</button>
-                </div>
-            </form>
-        </div>
-        <div class="col">
-            <ul style="background-color: cornflowerblue">
-                <li>
-                    <span class="list-group-item" th:text="${adminuser.username}"></span>
-                    <span class="list-group-item" th:text="${adminuser.role}"></span>
-                </li>
-            </ul>
-            <ul>
-                <h4>Members</h4>
-                <li th:each="userrole : ${userroles}">
-                    <span class="list-group-item" th:text="${userrole.username}"></span>
-                    <span class="list-group-item" th:text="${userrole.role}"></span>
-                </li>
-            </ul>
-
-            <form th:action="@{/chatroom/{id}/create-role(id=${chatroom.id})}" method="GET" style="max-width: 600px; margin: 0 auto";>
-                <label class="col-4 col-form-label"> Want a role? </label>
-                <button type="submit" class="btn">Create</button>
-            </form>
-
-            <ul>
+            <ul id="fileList" class="list-group">
                 <h4>Files</h4>
-                <li th:each="fileMessage : ${fileMessages}">
-                    <span class="list-group-item" th:text="${userRepo.getUsername(fileMessage.userId)}"></span>
-                    <span class="list-group-item" th:text="${fileMessage.date}"></span>
-                    <a class="list-group-item"  th:href="${fileMessage.message}" target='_blank' th:text="${fileMessage.message}"></a>
-                </li>
+                <div th:each="fileMessage : ${fileMessages}" class="list-group-item file-item-link">
+                    <span th:text="${userRepo.getUsername(fileMessage.userId)}"></span>
+                    <span class="date-span" th:text="${fileMessage.date}"></span>
+                    <span><a th:href="${fileMessage.message}" target='_blank' th:text="${fileRepository.findDBFileByFileId(fileMessage.getFileId()).getFileName()}"></a></span>
+                </div>
             </ul>
         </div>
-    </div>
-
 </div>
-<div class="container text-center">
-    <h4><a th:href="@{/home}">Back to Chatroom Home</a></h4>
+<div class="text-center footer">
+    <h4><a th:href="@{/home}" id="back-to-home-btn">Back to Chatroom Home</a></h4>
+</div>
 </div>
 </body>
 
@@ -187,7 +304,9 @@
             if(xhr.status == 200) {
                 singleFileUploadError.style.display = "none";
                 fileId = response.fileId;
-                messageInput.value = response.fileDownloadUri;
+                var fileName = response.fileName;
+                //messageInput.value = response.fileDownloadUri;
+                messageInput.value= "<a href=" + response.fileDownloadUri + "; target='_blank';>" + response.fileName + " </a>";
                 sendButton.click();
             } else {
                 singleFileUploadError.innerHTML = (response && response.message) || "Some Error Occurred";
@@ -215,7 +334,7 @@
     var messageArea = document.querySelector('#messageArea');
     var connectingElement = document.querySelector('#connecting');
     var startForm = document.querySelector('#startForm');
-    var leaveForm = document.querySelector('#leaveForm');
+    var backToHome = document.querySelector('#back-to-home-btn');
     var uploadFrom = document.querySelector('#upload-container');
     var uploadBtn = document.querySelector('#uploadBtn');
 
@@ -246,9 +365,14 @@
         event.preventDefault();
     }
 
+    function gotoBottom(id){
+        var element = document.getElementById(id);
+        element.scrollTop = element.scrollHeight - element.clientHeight;
+    }
+
     function connect(event) {
         messageForm.style.display = "block";  // <-- Set it to block to display
-        leaveForm.style.display = "block";
+        gotoBottom("chat-messages-id");
 
         // CONNECT TO SOCKET SERVER
         username = document.querySelector('#name').value.trim();
@@ -278,7 +402,7 @@
         // Subscribe to the Public Topic
         stompClient.subscribe('/topic/public', onMessageReceived);
         stompClient.subscribe('/topic/favorite', onFavoriteStatusChange);
-
+        gotoBottom("chat-messages-id");
         // Tell your username to the server
         stompClient.send("/app/chat.addUser",
             {},
@@ -289,7 +413,6 @@
 
     function leave(event) {
         messageForm.style.display = "none";  // <-- Set it back to none to hide display
-        leaveForm.style.display = "none";
         startForm.style.display = "block";
 
         username = document.querySelector('#name').value.trim();
@@ -300,17 +423,21 @@
             };
             stompClient.send("/app/chat.leaveUser", {}, JSON.stringify(chatMessage));
         }
-        event.preventDefault();
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/home");
+        xhr.send();
     }
 
 
     function onError(error) {
+        gotoBottom("chat-messages-id");
         connectingElement.textContent = 'Could not connect to WebSocket server. Please refresh this page to try again!';
         connectingElement.style.color = 'red';
         connectingElement.style.display = "block";
     }
 
     function sendMessage(event) {
+        gotoBottom("chat-messages-id");
         chatCounts = 0;  // When new message sent reset count
         uploadFrom.style.display = "none";
         messageForm.style.display = "block";
@@ -340,8 +467,8 @@
         event.preventDefault();
     }
 
-
     function onMessageReceived(payload) {
+        gotoBottom("chat-messages-id");
         var message = JSON.parse(payload.body);
 
         var messageElement = document.createElement('li');  // create list element;
@@ -349,6 +476,8 @@
         if(message.type === 'JOIN') {
             if(joinCounts === 0) {
                 messageElement.classList.add('event-message');
+                messageElement.classList.add('list-group-item');
+                messageElement.classList.add('list-message');
                 message.content = message.sender + ' joined!'; // message when joining
             }
             else{
@@ -358,6 +487,8 @@
         } else if (message.type === 'LEAVE') {
             if(leaveCounts === 0) {
                 messageElement.classList.add('event-message');
+                messageElement.classList.add('list-group-item');
+                messageElement.classList.add('list-message');
                 message.content = message.sender + ' left!'; // message when leaving
             }
             else{
@@ -373,16 +504,12 @@
                 joinCounts = 0;
                 leaveCounts = 0;
                 messageElement.classList.add('chat-message');
-
-                var avatarElement = document.createElement('i');  // i - tag for avatar color
-                var avatarText = document.createTextNode(message.sender[0]);
-                avatarElement.appendChild(avatarText);
-                avatarElement.style['background-color'] = getAvatarColor(message.sender);
-
-                messageElement.appendChild(avatarElement);
+                messageElement.classList.add('list-group-item');
+                messageElement.classList.add('list-message');
 
                 var usernameElement = document.createElement('span'); // span - tag for username sender
                 var usernameText = document.createTextNode(message.sender);
+                usernameElement.classList.add('username-span');
                 usernameElement.appendChild(usernameText);
                 messageElement.appendChild(usernameElement);
                 chatCounts = chatCounts + 1;
@@ -391,11 +518,12 @@
         if(messageElement !== null) {
             const textElement = document.createElement('p');
             if(message.type === 'FILE'){
-                const fileUrlElement = document.createElement('a');
+                /*const fileUrlElement = document.createElement('a');
                 fileUrlElement.href = message.content;
                 fileUrlElement.target = "'_blank'";
                 fileUrlElement.text = message.content;
-                textElement.appendChild(fileUrlElement);
+                textElement.appendChild(fileUrlElement);*/
+                textElement.innerHTML = message.content;
             } else {
                 const messageText = document.createTextNode(message.content);
                 textElement.appendChild(messageText);
@@ -407,17 +535,6 @@
 
         }
     }
-
-
-    function getAvatarColor(messageSender) {
-        var hash = 0;
-        for (var i = 0; i < messageSender.length; i++) {
-            hash = 31 * hash + messageSender.charCodeAt(i);
-        }
-        var index = Math.abs(hash % colors.length);
-        return colors[index];
-    }
-
 
     function makeFavorite(event) {
         //stompClient.subscribe('/topic/favorite', onFavoriteStatusChange);
@@ -464,7 +581,7 @@
 
     //usernameForm.addEventListener('submit', connect, true)
     messageForm.addEventListener('submit', sendMessage, true)
-    leaveForm.addEventListener('submit', leave, true)
+    backToHome.addEventListener('click', leave, true)
     favoriteForm.addEventListener('submit', makeFavorite, true)
     removeFavoriteForm.addEventListener('submit', removeFavorite, true)
     document.addEventListener('DOMContentLoaded', connect, false);
