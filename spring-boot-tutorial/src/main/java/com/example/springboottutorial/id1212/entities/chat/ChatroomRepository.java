@@ -14,5 +14,8 @@ public interface ChatroomRepository extends CrudRepository<Chatroom, String> {
 
     @Query("select c from Chatroom c WHERE c.status = true")
     ArrayList<Chatroom>  getAllPublicId();
+
+    @Query("select c.status from Chatroom c WHERE c.chatroomId = ?1")
+    Boolean getStatusByChatroomId(Integer chatroomId);
 }
 

@@ -2,6 +2,8 @@ package com.example.springboottutorial.id1212.controller;
 
 import com.example.springboottutorial.id1212.DTO.MessageUserDTO;
 import com.example.springboottutorial.id1212.DTO.UserRoleDTO;
+import com.example.springboottutorial.id1212.DTO.EmailsDTO;
+
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomCategory.ChatroomCategory;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomCategory.ChatroomCategoryRepository;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser.ChatroomUser;
@@ -26,7 +28,6 @@ public class UserController {
     private final ChatroomCategoryRepository chatroomCategoryRepository;
     private final RoleRepository roleRepository;
     private MessageRepository messageRepository;
-    private MessageUserDTO messageUserDTO;
     private User user;
     private ChatroomCategory chatroomCategory;
 
@@ -46,13 +47,12 @@ public class UserController {
     @PostMapping("/home")
     public String findUser(@RequestParam String email, @RequestParam String password, Model model) {
         user = userRepository.findUserByEmailAndPassword(email, password);
-        if(user != null){
+        if (user != null) {
             model.addAttribute("user", user);
             Integer userId = user.getUserId();
             home(model);
             return "home";
-        }
-        else {
+        } else {
             String message = "Invalid e-mail/password";
             model.addAttribute("message", message);
         }
@@ -61,12 +61,11 @@ public class UserController {
 
     @GetMapping("/home")
     public String test(Model model) {
-        if(user != null){
+        if (user != null) {
             model.addAttribute("user", user);
             home(model);
             return "home";
-        }
-        else {
+        } else {
             String message = "You are logged out";
             model.addAttribute("message", message);
         }
@@ -80,11 +79,11 @@ public class UserController {
         ArrayList<Integer> favChatrooms = chatroomUserRepository.getAllChatroomIdsForFavoriteChatroomByUserId(user.getUserId());
         ArrayList<Chatroom> favoriteChatrooms = new ArrayList<>();
 
-        for(Integer favChat : favChatrooms) {
+        for (Integer favChat : favChatrooms) {
             Chatroom fcr = chatroomRepository.findChatRoomByChatroomId(favChat);
             favoriteChatrooms.add(fcr); // / Users favorite chatrooms
         }
-        for(ChatroomUser cu : chatroomUser) {
+        for (ChatroomUser cu : chatroomUser) {
             Integer chatId = cu.getChatroomId();
             Chatroom cr = chatroomRepository.findChatRoomByChatroomId(chatId);
             chatrooms.add(cr);   // Chatroom the user is part of
@@ -100,15 +99,14 @@ public class UserController {
 
     @GetMapping("/create-chatroom")
     public String createChatroom(Model model) {
-        if(user != null){
+        if (user != null) {
             Chatroom chatroom = new Chatroom();
             ArrayList<Category> categories = (ArrayList<Category>) categoryRepository.findAll();
             model.addAttribute("categories", categories);
             model.addAttribute("chatroom", chatroom);
 
             return "create-chatroom";
-        }
-        else {
+        } else {
             String message = "You are logged out";
             model.addAttribute("message", message);
         }
@@ -129,19 +127,120 @@ public class UserController {
                     chatroomCategoryRepository.save(chatroomCategory);
                 }
             }
+            // ChatroomUser for Admin always
             ChatroomUser chatroomUser = new ChatroomUser();
             chatroomUser.setChatroomId(chatroom.getId());
             chatroomUser.setUserId(user.getUserId());
             chatroomUser.setAdmin(1); // TRUE
+            chatroomUser.setFavorite(0); // FALSE
             chatroomUserRepository.save(chatroomUser);
 
+
+            // Private status for chatroom
+            Boolean statusPublic = chatroomRepository.getStatusByChatroomId(chatroom.getId());
+            if (!statusPublic) {
+                EmailsDTO emails = new EmailsDTO();
+                model.addAttribute("emails", emails);
+                model.addAttribute("user", user);
+                model.addAttribute("chatroom", chatroom);
+
+                return "create-chatroom-private";
+            }
+
             return "create-chatroom-success";
-        }
-        else {
+        } else {
             String message = "You are logged out";
             model.addAttribute("message", message);
         }
         return "index";
+    }
+
+    @PostMapping("/create-chatroom-private-process/{id}")
+    public String processChatroomPrivate(Model model, EmailsDTO emails, @PathVariable Integer id) {
+        if (user != null) {
+            Integer number = emails.getNumber();
+            Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
+
+            String emailInput = emails.getEmails();
+            if(emailInput == null) {
+                String message = "No emails were entered";
+                model.addAttribute("nomail", message);
+            }
+            else {
+                long count = emailInput.chars().filter(ch -> ch == ',').count(); // ex. 3 emails = 2 ","
+                long emailsCounted = count + 1;
+                if (emailsCounted == number) {
+                    if(number != 1) { // If more than one email added
+                        String[] uniqueEmails = emailInput.split(", ", number); // check first for number of , to know limit value
+                        splitEmailsPrivateChatroom(model, uniqueEmails, chatroom);
+                    }
+                }
+                if (emailsCounted != number) {
+                    if (count != 0){ // If more than one email added
+                        String missMatch = "You entered " + number + "users to add, but entered " + emailsCounted + " many emails.";
+                        String[] uniqueEmails = emailInput.split(", ", number); // check first for number of , to know limit value
+                        splitEmailsPrivateChatroom(model, uniqueEmails, chatroom);
+                        model.addAttribute("missmatch", missMatch);
+                    }
+                }
+                if (count == 0) {
+                    Integer userId = userRepository.getUserIdByEmail(emailInput);
+                    if(userId == null){
+                        String message = "The email you entered is not in our system " + emailInput;
+                        model.addAttribute("nouser", message);
+                    }
+                    if(userId != null){
+                        model.addAttribute("onemail", emailInput);
+                    }
+                }
+            }
+            model.addAttribute("chatroom", chatroom);
+            return "create-chatroom-success";
+
+        } else {
+            String message = "You are logged out";
+            model.addAttribute("message", message);
+        }
+        return "index";
+    }
+
+    public void splitEmailsPrivateChatroom(Model model,String[] emails, Chatroom chatroom) {
+        ArrayList<String> failedEmails = new ArrayList<>();
+        ArrayList<String> successfulEmails = new ArrayList<>();
+        long fail = 0;
+        long success = 0;
+        for (String mail : emails) {
+            System.out.println("EMAILS = " + mail + " ------------------------------------------------------");
+            Integer userId = userRepository.getUserIdByEmail(mail);
+            if (userId == null) {
+                failedEmails.add(mail);
+                fail = fail + 1;
+            }
+            if (userId != user.getUserId()) { // Not re-add admin user, chatroom creator
+                if (userId != null) {
+                    chatroom.addUserCount(1);
+                    ChatroomUser chatroomUser = new ChatroomUser();
+                    chatroomUser.setChatroomId(chatroom.getId());
+                    chatroomUser.setUserId(userId);
+                    chatroomUser.setAdmin(0); // FALSE
+                    chatroomUser.setFavorite(0); // FALSE
+                    chatroomUserRepository.save(chatroomUser);
+                    successfulEmails.add(mail);
+                    success = success + 1;
+                }
+            }
+        }
+        if (fail != 0 && success != 0) { // Not fail or succedd completely
+            model.addAttribute("failed", failedEmails);
+            model.addAttribute("success", successfulEmails);
+        }
+        else if (success == 0 && fail != 0) { // Failure
+            model.addAttribute("failed", failedEmails);
+        }
+        else if (fail == 0 && success != 0) { // Success
+            model.addAttribute("success", successfulEmails);
+        }
+
     }
 
     @GetMapping("/signup")
@@ -166,7 +265,7 @@ public class UserController {
     }
 
     @GetMapping("/leave-chatroom/{id}")
-    public String leaveChatroom(@PathVariable Integer id, Model model){
+    public String leaveChatroom(@PathVariable Integer id, Model model) {
         ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(user.getUserId(), id);
        /* Integer roleId = chatroomUserRepository.getRoleIdByUserIdChatroomId(user.getUserId(), id);
         Role role = roleRepository.findRoleByRoleId(roleId);
@@ -176,17 +275,17 @@ public class UserController {
         System.out.println("AFTER DELETE CHATROOM USER! ----------------------------------------");
         Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
         ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByChatroomId(id);
-        if(chatroomUser.getAdmin() == 1) { // TRUE
+        if (chatroomUser.getAdmin() == 1) { // TRUE
             /*if chatroom had categories the bridge needs to be removed first*/
-            if(chatroomCategories.size() > 0) {
-                for(ChatroomCategory cc : chatroomCategories){
+            if (chatroomCategories.size() > 0) {
+                for (ChatroomCategory cc : chatroomCategories) {
                     chatroomCategoryRepository.delete(cc);
                 }
             }
             /*if chatroom had messages those needs to be removed too */
             ArrayList<Integer> messageIdsInChatroom = messageRepository.getAllMessageIdsByChatroomId(id);
-            if(messageIdsInChatroom.size() > 0) {
-                for(Integer mId : messageIdsInChatroom){
+            if (messageIdsInChatroom.size() > 0) {
+                for (Integer mId : messageIdsInChatroom) {
                     Message m = messageRepository.findMessageByMessageId(mId);
                     messageRepository.delete(m);
                 }
@@ -199,7 +298,7 @@ public class UserController {
 
     @GetMapping("/chatroom/{id}")
     public String showChatroom(@PathVariable Integer id, Model model) {
-        if(user != null){
+        if (user != null) {
             Integer userId = user.getUserId();
             Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
             ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(userId, id);
@@ -208,33 +307,35 @@ public class UserController {
             ArrayList<Category> categories = new ArrayList<>();
 
 
-            for(ChatroomCategory chatroomCategory : chatroomCategories){
+            for (ChatroomCategory chatroomCategory : chatroomCategories) {
                 categories.add(categoryRepository.findCategoryBycategoryId(chatroomCategory.getCategoryId()));
             }
 
-            if(chatroomUser == null) { // if chatroomUser not exist - user joined new public room
+            if (chatroomUser == null) { // if chatroomUser not exist - user joined new public room
                 chatroom.addUserCount(1);
                 chatroomRepository.save(chatroom);
                 chatroomUser = new ChatroomUser();
                 chatroomUser.setChatroomId(id);
                 chatroomUser.setUserId(userId);
-                Integer adminValue = 0;
-                chatroomUser.setAdmin(adminValue); // FALSE
+                chatroomUser.setAdmin(0); // FALSE
+                chatroomUser.setFavorite(0); // FALSE
                 chatroomUserRepository.save(chatroomUser);
                 return "redirect:/chatroom/{id}";
             }
 
-            if(chatroom != null){
+            if (chatroom != null) {
                 prevConversation(model, id);
                 chatroomRole(model, id);
                 chatroomFiles(model, id);
 
                 Integer favoriteStatus = chatroomUserRepository.getFavoriteStatusByUserIdChatroomId(userId, id);
+
                 String favoriteString = "false";
-                if(favoriteStatus != null) {
-                    System.out.println("Favorite Status USER CONTROLLER = " + favoriteStatus + "--------------------------------------------------------------------------");
-                    if(favoriteStatus.equals(1)) {
+                Boolean favoriteBool = false;
+                if (favoriteStatus != null) { //
+                    if (favoriteStatus.equals(1)) {
                         favoriteString = "true";
+                        favoriteBool = true;
                     }
                 } else {
                     favoriteStatus = 0;
@@ -243,7 +344,7 @@ public class UserController {
                 model.addAttribute("favorite", favoriteStatus);
 
                 Integer roleId = chatroomUser.getRoleId();
-                if(roleId != null) {
+                if (roleId != null) {
                     Role role = roleRepository.findRoleByRoleId(roleId);
                     String roleName = role.getRole();
                     model.addAttribute("userRole", roleName);
@@ -259,8 +360,7 @@ public class UserController {
             }
 
             return "chatroom";
-        }
-        else {
+        } else {
             String message = "You are logged out";
             model.addAttribute("message", message);
         }
@@ -284,19 +384,19 @@ public class UserController {
             Integer admin = chatroomUserRepository.getAdminStatusByUserIdChatroomId(userId, chatroomId);
             Integer roleId = chatroomUserRepository.getRoleIdByUserIdChatroomId(userId, chatroomId);
 
-            if(roleId != null) {
+            if (roleId != null) {
                 Role role = roleRepository.findRoleByRoleId(roleId);
                 String roleName = role.getRole();
-                if(admin == 1) { // TRUE
+                if (admin == 1) { // TRUE
                     adminUser.setRole(roleName);
+                } else {
+                    userRole.setRole(roleName);
                 }
-                else { userRole.setRole(roleName); }
             }
 
-            if(admin == 1) { // TRUE
+            if (admin == 1) { // TRUE
                 adminUser.setUsername(username);
-            }
-            else {
+            } else {
                 userRole.setUsername(username);
                 userRoles.add(userRole);
             }
@@ -335,7 +435,7 @@ public class UserController {
 
     @GetMapping("/chatroom/{id}/create-role")
     public String createRole(Model model, @PathVariable Integer id) {
-        if(user != null){
+        if (user != null) {
             Integer currentRole = chatroomUserRepository.getRoleIdByUserIdChatroomId(user.getUserId(), id);
             if (currentRole != null) {
                 chatroomUserRepository.updateChatroomUserWithRoleId(null, id, user.getUserId());
@@ -347,8 +447,7 @@ public class UserController {
             model.addAttribute("chatroom", chatroom);
 
             return "create-role";
-        }
-        else {
+        } else {
             String message = "You are logged out";
             model.addAttribute("message", message);
         }
@@ -357,7 +456,7 @@ public class UserController {
 
     @PostMapping("/chatroom/{id}/create-role-process")
     public String processRole(Model model, @PathVariable Integer id, String role) { // Does not work when Role role as should
-        if(user != null){
+        if (user != null) {
             Role chatRole = new Role();
             chatRole.setRole(role);
             roleRepository.save(chatRole);
@@ -374,8 +473,7 @@ public class UserController {
             model.addAttribute("role", role);
 
             return "create-role-success";
-        }
-        else {
+        } else {
             String message = "You are logged out";
             model.addAttribute("message", message);
         }
