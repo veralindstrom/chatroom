@@ -328,14 +328,16 @@ public class UserController {
                 chatroomRole(model, id);
                 chatroomFiles(model, id);
 
-                Integer favoriteStatus = chatroomUserRepository.getFavoriteStatusByUserIdChatroomId(userId, id);
+                if (!chatroom.getStatus()) { // If false then status is Private
+                    String statusP = "Private";
+                    model.addAttribute("status", statusP);
+                }
 
+                Integer favoriteStatus = chatroomUserRepository.getFavoriteStatusByUserIdChatroomId(userId, id);
                 String favoriteString = "false";
-                Boolean favoriteBool = false;
                 if (favoriteStatus != null) { //
                     if (favoriteStatus.equals(1)) {
                         favoriteString = "true";
-                        favoriteBool = true;
                     }
                 } else {
                     favoriteStatus = 0;
