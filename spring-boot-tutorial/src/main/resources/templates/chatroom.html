@@ -30,12 +30,6 @@
             margin-bottom: 8px;
         }
 
-        .categories-favorite-header{
-            display: flex;
-            flex-direction: row;
-            justify-content: space-evenly;
-        }
-
         .category-list{
             margin: 0.3rem 1rem;
             padding: 0 1rem;
@@ -101,7 +95,7 @@
         .list-sidebar{
             display: grid;
             grid-template-columns: 100%;
-            grid-template-rows: 40% 10% 50%;
+            grid-auto-rows: minmax(min-content, max-content);
         }
 
         .admin{
@@ -115,15 +109,26 @@
 
         .role-btn{
             border: none;
-            padding: 9px;
         }
 
         .role-btn:hover{
             color: lightgrey;
         }
 
+        .list{
+            padding: 0;
+            overflow-y: scroll;
+            margin: 0;
+        }
+
+        .create-role-form{
+            display: flex;
+        }
+
         #fileList{
             overflow-y: scroll;
+            overflow-x: hidden;
+            padding: 0;
         }
 
         .file-item-link{
@@ -149,10 +154,11 @@
 
 <div id="username-page" class="chatroom-header" >
     <div class="username-page-container">
+        <h1 th:if="${!status}"class="title" th:text="${chatroom.name}" style="font-style: italic;"></h1>
+        <h1 th:if="${status}" class="title" th:text="${chatroom.name}"></h1>
         <h1 style="display:none" class="title" id="chatId" th:text="${chatroomId}"></h1>
         <h1 style="display:none" class="title" id="favoriteStatus" th:text="${favorite}"></h1>
         <h1 style="display:none" class="title" id="favoriteString" th:text="${favString}"></h1>
-        <h1 class="title" th:text="${chatroom.name}"></h1>
 
         <div style="display:none" id="userId" th:text="${user.userId}"></div>
         <form style="display:none" id="usernameForm" name="usernameForm">
@@ -235,8 +241,7 @@
         </div>
 
         <div class="list-sidebar">
-            <ul class="list-group">
-                <h4>Members</h4>
+            <ul class="list" id="members-list">
                 <li class="list-group-item">
                     <div class="admin">
                         <span class="username-span" th:text="${adminuser.username}"></span>
@@ -250,20 +255,21 @@
                 </li>
             </ul>
             <div>
-                <form th:action="@{/chatroom/{id}/create-role(id=${chatroom.id})}" method="GET" style="max-width: 600px;">
+                <form class="create-role-form" th:action="@{/chatroom/{id}/create-role(id=${chatroom.id})}" method="GET" style="max-width: 600px;">
                     <label class="col-form-label"> Want a role? </label>
                     <button type="submit" class="btn role-btn">Create</button>
                 </form>
             </div>
-            <ul id="fileList" class="list-group">
-                <h4>Files</h4>
+
+            <h4>Files</h4>
+                <div id="fileList" class="list">
                 <div th:each="fileMessage : ${fileMessages}" class="list-group-item file-item-link">
                     <span th:text="${userRepo.getUsername(fileMessage.userId)}"></span>
                     <span class="date-span" th:text="${fileMessage.date}"></span>
                     <span><a th:href="${fileMessage.message}" target='_blank' th:text="${fileRepository.findDBFileByFileId(fileMessage.getFileId()).getFileName()}"></a></span>
                 </div>
-            </ul>
-        </div>
+                </div>
+            </div>
 </div>
 <div class="text-center footer">
     <h4><a th:href="@{/home}" id="back-to-home-btn">Back to Chatroom Home</a></h4>

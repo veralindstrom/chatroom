@@ -78,7 +78,7 @@ public class UserController {
 
     private void home(Model model) {
         ArrayList<ChatroomUser> chatroomUser = chatroomUserRepository.findChatroomUsersByUserId(user.getUserId());
-        ArrayList<Chatroom> chatrooms = new ArrayList<>();
+        ArrayList<Chatroom> chatrooms = new ArrayList<>(); // Remaining in Your chatrooms
         ArrayList<Chatroom> publicChatrooms = chatroomRepository.getAllPublicId();
         ArrayList<Integer> favChatrooms = chatroomUserRepository.getAllChatroomIdsForFavoriteChatroomByUserId(user.getUserId());
         ArrayList<Chatroom> favoriteChatrooms = new ArrayList<>();
@@ -234,7 +234,7 @@ public class UserController {
                 }
             }
         }
-        if (fail != 0 && success != 0) { // Not fail or succedd completely
+        if (fail != 0 && success != 0) { // Not fail or succeed completely
             model.addAttribute("failed", failedEmails);
             model.addAttribute("success", successfulEmails);
         }
@@ -332,14 +332,15 @@ public class UserController {
                 chatroomRole(model, id);
                 chatroomFiles(model, id);
 
-                Integer favoriteStatus = chatroomUserRepository.getFavoriteStatusByUserIdChatroomId(userId, id);
 
+                model.addAttribute("status", chatroom.getStatus()); //if status is true then public
+
+
+                Integer favoriteStatus = chatroomUserRepository.getFavoriteStatusByUserIdChatroomId(userId, id);
                 String favoriteString = "false";
-                Boolean favoriteBool = false;
                 if (favoriteStatus != null) { //
                     if (favoriteStatus.equals(1)) {
                         favoriteString = "true";
-                        favoriteBool = true;
                     }
                 } else {
                     favoriteStatus = 0;
