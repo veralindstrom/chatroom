@@ -116,15 +116,18 @@ public class UserController {
     }
 
     @PostMapping("/create-chatroom-process")
-    public String processChatroom(Model model, Chatroom chatroom, @RequestParam("categoryId") ArrayList<Integer> categoryIds) {
+    public String processChatroom(Model model, Chatroom chatroom, @RequestParam(required = false) ArrayList<Integer> categoryId) {
         if(user != null){
             chatroom.addUserCount(1);
             chatroomRepository.save(chatroom);
-            for (Integer categoryId : categoryIds){
-                chatroomCategory = new ChatroomCategory();
-                chatroomCategory.setCategoryId(categoryId);
-                chatroomCategory.setChatroomId(chatroom.getId());
-                chatroomCategoryRepository.save(chatroomCategory);
+
+            if(categoryId != null) {
+                for (Integer id : categoryId) {
+                    chatroomCategory = new ChatroomCategory();
+                    chatroomCategory.setCategoryId(id);
+                    chatroomCategory.setChatroomId(chatroom.getId());
+                    chatroomCategoryRepository.save(chatroomCategory);
+                }
             }
             ChatroomUser chatroomUser = new ChatroomUser();
             chatroomUser.setChatroomId(chatroom.getId());
@@ -233,6 +236,8 @@ public class UserController {
                     if(favoriteStatus.equals(1)) {
                         favoriteString = "true";
                     }
+                } else {
+                    favoriteStatus = 0;
                 }
                 model.addAttribute("favString", favoriteString); // must have for js code, not work with bool or number
                 model.addAttribute("favorite", favoriteStatus);
