@@ -10,6 +10,8 @@ import com.example.springboottutorial.id1212.entities.file.DBFileRepository;
 import com.example.springboottutorial.id1212.entities.user.User;
 import com.example.springboottutorial.id1212.entities.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +38,10 @@ public class UserController {
 
     @PostMapping("/home")
     public String findUser(@RequestParam String email, @RequestParam String password, Model model, HttpServletResponse response) {
-        user = userRepository.findUserByEmailAndPassword(email, password);
+        User tempUser = userRepository.findUserByEmail(email);
+        if(new BCryptPasswordEncoder().matches(password, tempUser.getPassword())){
+            user = tempUser;
+        }
         if (user != null) {
             setCookie(response, user.getUserId().toString());
             model.addAttribute("user", user);
@@ -257,6 +262,7 @@ public class UserController {
 
     @PostMapping("/signup-process")
     public String processRegister(User user) {
+        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         userRepository.save(user);
 
         return "signup-success";
