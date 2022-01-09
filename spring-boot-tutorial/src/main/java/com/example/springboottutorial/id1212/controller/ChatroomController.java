@@ -48,11 +48,6 @@ public class ChatroomController {
         }
     }
 
-    @GetMapping("/test-chat-functionality")
-    public String showTestChat(){
-        return "test-chat-functionality";
-    }
-
     @GetMapping("/chatroom/{id}")
     public String showChatroom(@PathVariable Integer id, Model model, @CookieValue(value = "userId", required = false) String userIdFromCookie) {
         readCookie(userIdFromCookie);
