@@ -1,53 +1,44 @@
 package com.example.springboottutorial.id1212.controller;
 
-import com.example.springboottutorial.id1212.DTO.MessageUserDTO;
-import com.example.springboottutorial.id1212.DTO.UserRoleDTO;
-import com.example.springboottutorial.id1212.DTO.EmailsDTO;
-
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomCategory.ChatroomCategory;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomCategory.ChatroomCategoryRepository;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser.ChatroomUser;
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser.ChatroomUserRepository;
-import com.example.springboottutorial.id1212.entities.category.Category;
 import com.example.springboottutorial.id1212.entities.category.CategoryRepository;
 import com.example.springboottutorial.id1212.entities.chat.*;
+import com.example.springboottutorial.id1212.entities.file.DBFileRepository;
 import com.example.springboottutorial.id1212.entities.user.User;
 import com.example.springboottutorial.id1212.entities.user.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 
 @Controller
 public class UserController {
-    private final UserRepository userRepository;
-    private final ChatroomUserRepository chatroomUserRepository;
-    private final ChatroomRepository chatroomRepository;
-    private final CategoryRepository categoryRepository;
-    private final ChatroomCategoryRepository chatroomCategoryRepository;
-    private final RoleRepository roleRepository;
-    private MessageRepository messageRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ChatroomUserRepository chatroomUserRepository;
+    @Autowired
+    private ChatroomRepository chatroomRepository;
     private User user;
-    private ChatroomCategory chatroomCategory;
 
-    public UserController(ChatroomCategoryRepository chatroomCategoryRepository, CategoryRepository categoryRepository,
-                          UserRepository userRepository, ChatroomUserRepository chatroomUserRepository,
-                          ChatroomRepository chatroomRepository, MessageRepository messageRepository,
-                          RoleRepository roleRepository) {
-        this.userRepository = userRepository;
-        this.chatroomUserRepository = chatroomUserRepository;
-        this.chatroomRepository = chatroomRepository;
-        this.categoryRepository = categoryRepository;
-        this.chatroomCategoryRepository = chatroomCategoryRepository;
-        this.messageRepository = messageRepository;
-        this.roleRepository = roleRepository;
+    public void readCookie(@CookieValue(value = "userId", required = false) String userId) {
+        if(userId != null) {
+            user = userRepository.findUserByUserId(Integer.parseInt(userId));
+        }
     }
 
     @PostMapping("/home")
-    public String findUser(@RequestParam String email, @RequestParam String password, Model model) {
+    public String findUser(@RequestParam String email, @RequestParam String password, Model model, HttpServletResponse response) {
         user = userRepository.findUserByEmailAndPassword(email, password);
         if (user != null) {
+            setCookie(response, user.getUserId().toString());
             model.addAttribute("user", user);
             Integer userId = user.getUserId();
             home(model);
@@ -59,8 +50,21 @@ public class UserController {
         return "index";
     }
 
+    public void setCookie(HttpServletResponse response, String userId) {
+        // create a cookie
+        Cookie cookie = new Cookie("userId", userId);
+        cookie.setMaxAge(7 * 24 * 60 * 60); // expires in 7 days
+        cookie.setSecure(true);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/"); // global cookie accessible every where
+
+        //add cookie to response
+        response.addCookie(cookie);
+    }
+
     @GetMapping("/home")
-    public String test(Model model) {
+    public String test(Model model, @CookieValue(value = "userId", required = false) String userId) {
+        readCookie(userId);
         if (user != null) {
             model.addAttribute("user", user);
             home(model);
@@ -97,7 +101,7 @@ public class UserController {
         model.addAttribute("favchatroom", favoriteChatrooms);
     }
 
-    @GetMapping("/create-chatroom")
+   /* @GetMapping("/create-chatroom")
     public String createChatroom(Model model) {
         if (user != null) {
             Chatroom chatroom = new Chatroom();
@@ -111,9 +115,9 @@ public class UserController {
             model.addAttribute("message", message);
         }
         return "index";
-    }
+    }*/
 
-    @PostMapping("/create-chatroom-process")
+  /*  @PostMapping("/create-chatroom-process")
     public String processChatroom(Model model, Chatroom chatroom, @RequestParam(required = false) ArrayList<Integer> categoryId) {
         if(user != null){
             chatroom.addUserCount(1);
@@ -153,9 +157,9 @@ public class UserController {
             model.addAttribute("message", message);
         }
         return "index";
-    }
+    }*/
 
-    @PostMapping("/create-chatroom-private-process/{id}")
+ /*   @PostMapping("/create-chatroom-private-process/{id}")
     public String processChatroomPrivate(Model model, EmailsDTO emails, @PathVariable Integer id) {
         if (user != null) {
             Integer number = emails.getNumber();
@@ -202,9 +206,9 @@ public class UserController {
             model.addAttribute("message", message);
         }
         return "index";
-    }
+    }*/
 
-    public void splitEmailsPrivateChatroom(Model model,String[] emails, Chatroom chatroom) {
+  /*  public void splitEmailsPrivateChatroom(Model model,String[] emails, Chatroom chatroom) {
         ArrayList<String> failedEmails = new ArrayList<>();
         ArrayList<String> successfulEmails = new ArrayList<>();
         long fail = 0;
@@ -241,7 +245,8 @@ public class UserController {
             model.addAttribute("success", successfulEmails);
         }
 
-    }
+    }*/
+
 
     @GetMapping("/signup")
     public String showRegistrationForm(Model model) {
@@ -258,227 +263,17 @@ public class UserController {
     }
 
     @GetMapping("/logout")
-    public String logout(Model model) {
+    public String logout(Model model, HttpServletResponse response) {
         user = null;
+        Cookie cookie = new Cookie("userId", null);
+        cookie.setMaxAge(0);
+        cookie.setSecure(true);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+
+        //add cookie to response
+        response.addCookie(cookie);
 
         return "redirect:/home"; //to let user know she logged out
-    }
-
-    @GetMapping("/leave-chatroom/{id}")
-    public String leaveChatroom(@PathVariable Integer id, Model model) {
-        ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(user.getUserId(), id);
-       /* Integer roleId = chatroomUserRepository.getRoleIdByUserIdChatroomId(user.getUserId(), id);
-        Role role = roleRepository.findRoleByRoleId(roleId);
-        roleRepository.delete(role);*/
-
-        chatroomUserRepository.delete(chatroomUser);
-        System.out.println("AFTER DELETE CHATROOM USER! ----------------------------------------");
-        Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
-        ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByChatroomId(id);
-        if (chatroomUser.getAdmin() == 1) { // TRUE
-            /*if chatroom had categories the bridge needs to be removed first*/
-            if (chatroomCategories.size() > 0) {
-                for (ChatroomCategory cc : chatroomCategories) {
-                    chatroomCategoryRepository.delete(cc);
-                }
-            }
-            /*if chatroom had messages those needs to be removed too */
-            ArrayList<Integer> messageIdsInChatroom = messageRepository.getAllMessageIdsByChatroomId(id);
-            if (messageIdsInChatroom.size() > 0) {
-                for (Integer mId : messageIdsInChatroom) {
-                    Message m = messageRepository.findMessageByMessageId(mId);
-                    messageRepository.delete(m);
-                }
-            }
-            /*deleting chatroom*/
-            chatroomRepository.delete(chatroom);
-        }
-        return "leave-chatroom";
-    }
-
-    @GetMapping("/chatroom/{id}")
-    public String showChatroom(@PathVariable Integer id, Model model) {
-        if (user != null) {
-            Integer userId = user.getUserId();
-            Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
-            ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(userId, id);
-            //Chatroom chatroomWithUser = chatroomRepository.findChatRoomByChatroomId(chatroomUser.getChatroomId());
-            ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByChatroomId(id);
-            ArrayList<Category> categories = new ArrayList<>();
-
-
-            for (ChatroomCategory chatroomCategory : chatroomCategories) {
-                categories.add(categoryRepository.findCategoryBycategoryId(chatroomCategory.getCategoryId()));
-            }
-
-            if (chatroomUser == null) { // if chatroomUser not exist - user joined new public room
-                chatroom.addUserCount(1);
-                chatroomRepository.save(chatroom);
-                chatroomUser = new ChatroomUser();
-                chatroomUser.setChatroomId(id);
-                chatroomUser.setUserId(userId);
-                chatroomUser.setAdmin(0); // FALSE
-                chatroomUser.setFavorite(0); // FALSE
-                chatroomUserRepository.save(chatroomUser);
-                return "redirect:/chatroom/{id}";
-            }
-
-            if (chatroom != null) {
-                prevConversation(model, id);
-                chatroomRole(model, id);
-                chatroomFiles(model, id);
-
-                if (!chatroom.getStatus()) { // If false then status is Private
-                    String statusP = "Private";
-                    model.addAttribute("status", statusP);
-                }
-
-                Integer favoriteStatus = chatroomUserRepository.getFavoriteStatusByUserIdChatroomId(userId, id);
-                String favoriteString = "false";
-                if (favoriteStatus != null) { //
-                    if (favoriteStatus.equals(1)) {
-                        favoriteString = "true";
-                    }
-                } else {
-                    favoriteStatus = 0;
-                }
-                model.addAttribute("favString", favoriteString); // must have for js code, not work with bool or number
-                model.addAttribute("favorite", favoriteStatus);
-
-                Integer roleId = chatroomUser.getRoleId();
-                if (roleId != null) {
-                    Role role = roleRepository.findRoleByRoleId(roleId);
-                    String roleName = role.getRole();
-                    model.addAttribute("userRole", roleName);
-                }
-
-                model.addAttribute("categories", categories);
-                //model.addAttribute("chatroom", chatroomWithUser);
-                Chatroom cr = chatroomRepository.findChatRoomByChatroomId(id);
-                model.addAttribute("user", user);
-                model.addAttribute("chatroom", cr);
-                model.addAttribute("chatroomId", id);
-                chatroom(model, cr);
-            }
-
-            return "chatroom";
-        } else {
-            String message = "You are logged out";
-            model.addAttribute("message", message);
-        }
-        return "index";
-    }
-
-    private void chatroomFiles(Model model, Integer chatroomId) {
-        ArrayList<Message> fileMessages = messageRepository.findMessagesByChatroomIdAndFileIdIsNotNull(chatroomId);
-        model.addAttribute("fileMessages", fileMessages);
-        model.addAttribute("userRepo", userRepository);
-    }
-
-    private void chatroomRole(Model model, Integer chatroomId) {
-        ArrayList<Integer> userIdsInChatroom = chatroomUserRepository.getAllUserIdsByChatroomIdDescRoleIdOrder(chatroomId);
-        ArrayList<UserRoleDTO> userRoles = new ArrayList<UserRoleDTO>();
-        UserRoleDTO adminUser = new UserRoleDTO();
-
-        for (Integer userId : userIdsInChatroom) {
-            UserRoleDTO userRole = new UserRoleDTO();
-            String username = userRepository.getUsername(userId);
-            Integer admin = chatroomUserRepository.getAdminStatusByUserIdChatroomId(userId, chatroomId);
-            Integer roleId = chatroomUserRepository.getRoleIdByUserIdChatroomId(userId, chatroomId);
-
-            if (roleId != null) {
-                Role role = roleRepository.findRoleByRoleId(roleId);
-                String roleName = role.getRole();
-                if (admin == 1) { // TRUE
-                    adminUser.setRole(roleName);
-                } else {
-                    userRole.setRole(roleName);
-                }
-            }
-
-            if (admin == 1) { // TRUE
-                adminUser.setUsername(username);
-            } else {
-                userRole.setUsername(username);
-                userRoles.add(userRole);
-            }
-        }
-        model.addAttribute("adminuser", adminUser);
-        model.addAttribute("userroles", userRoles);
-    }
-
-    private void chatroom(Model model, Chatroom chat) {
-        Integer chatId = chat.getId();
-        //Integer userId = user.getUserId();
-        //ArrayList<ChatroomUser> chatroomUserList = chatroomUserRepository.findChatroomUsersByChatroomId(chatId);
-        ArrayList<Integer> userIdList = chatroomUserRepository.getAllUserIdsByChatroomId(chatId);
-        ArrayList<String> userNames = new ArrayList<String>();
-        for (Integer id : userIdList) {
-            String name = userRepository.getUsername(id);
-            userNames.add(name);
-        }
-        model.addAttribute("usernames", userNames);
-    }
-
-    private void prevConversation(Model model, Integer chatroomId) {
-        ArrayList<Message> conversation = messageRepository.getAllMessagesInChatroom(chatroomId);
-        ArrayList<MessageUserDTO> usernameConversations = new ArrayList<MessageUserDTO>();
-        for (Message mes : conversation) {
-            Integer userId = messageRepository.getUserIdByMessageId(mes.getId());
-            String name = userRepository.getUsername(userId);
-
-            MessageUserDTO userMessage = new MessageUserDTO();
-            userMessage.setMessage(mes);
-            userMessage.setUsername(name);
-            usernameConversations.add(userMessage);
-        }
-        model.addAttribute("conversation", usernameConversations);
-    }
-
-    @GetMapping("/chatroom/{id}/create-role")
-    public String createRole(Model model, @PathVariable Integer id) {
-        if (user != null) {
-            Integer currentRole = chatroomUserRepository.getRoleIdByUserIdChatroomId(user.getUserId(), id);
-            if (currentRole != null) {
-                chatroomUserRepository.updateChatroomUserWithRoleId(null, id, user.getUserId());
-            }
-            Role role = new Role();
-            Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
-            model.addAttribute("role", role);
-            model.addAttribute("user", user);
-            model.addAttribute("chatroom", chatroom);
-
-            return "create-role";
-        } else {
-            String message = "You are logged out";
-            model.addAttribute("message", message);
-        }
-        return "index";
-    }
-
-    @PostMapping("/chatroom/{id}/create-role-process")
-    public String processRole(Model model, @PathVariable Integer id, String role) { // Does not work when Role role as should
-        if (user != null) {
-            Role chatRole = new Role();
-            chatRole.setRole(role);
-            roleRepository.save(chatRole);
-
-            Integer roleId = chatRole.getRoleId();
-            Integer userId = user.getUserId();
-
-            //ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(user.getUserId(), id);
-
-            chatroomUserRepository.updateChatroomUserWithRoleId(roleId, id, userId);
-
-            Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
-            model.addAttribute("chatroom", chatroom);
-            model.addAttribute("role", role);
-
-            return "create-role-success";
-        } else {
-            String message = "You are logged out";
-            model.addAttribute("message", message);
-        }
-        return "index";
     }
 }
