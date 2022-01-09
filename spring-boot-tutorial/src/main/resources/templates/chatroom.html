@@ -368,12 +368,11 @@
 
     function gotoBottom(id){
         var element = document.getElementById(id);
-        element.scrollTop = element.scrollHeight - element.clientHeight;
+        element.scrollTop = element.scrollHeight - element.clientHeight + 100;
     }
 
     function connect(event) {
         messageForm.style.display = "block";  // <-- Set it to block to display
-        gotoBottom("chat-messages-id");
 
         // CONNECT TO SOCKET SERVER
         username = document.querySelector('#name').value.trim();
@@ -403,13 +402,13 @@
         // Subscribe to the Public Topic
         stompClient.subscribe('/topic/public', onMessageReceived);
         stompClient.subscribe('/topic/favorite', onFavoriteStatusChange);
-        gotoBottom("chat-messages-id");
         // Tell your username to the server
         stompClient.send("/app/chat.addUser",
             {},
             JSON.stringify({sender: username, type: 'JOIN'})  // adding user in ChatController and sending join
         )
         connectingElement.style.display = "none";
+        gotoBottom("chat-messages-id");
     }
 
     function leave(event) {
@@ -437,7 +436,6 @@
     }
 
     function sendMessage(event) {
-        gotoBottom("chat-messages-id");
         chatCounts = 0;  // When new message sent reset count
         uploadFrom.style.display = "none";
         messageForm.style.display = "block";
@@ -464,11 +462,11 @@
             messageInput.value = '';
         }
         fileId = null;
+        gotoBottom("chat-messages-id");
         event.preventDefault();
     }
 
     function onMessageReceived(payload) {
-        gotoBottom("chat-messages-id");
         var message = JSON.parse(payload.body);
 
         var messageElement = document.createElement('li');  // create list element;
@@ -532,8 +530,8 @@
             messageElement.appendChild(textElement);
             messageArea.appendChild(messageElement);
             messageArea.scrollTop = messageArea.scrollHeight;  // all inserted into ul tag with id messageArea
-
         }
+        gotoBottom("chat-messages-id");
     }
 
     function makeFavorite(event) {
