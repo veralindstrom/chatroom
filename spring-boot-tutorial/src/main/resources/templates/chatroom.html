@@ -95,7 +95,7 @@
         .list-sidebar{
             display: grid;
             grid-template-columns: 100%;
-            grid-auto-rows: minmax(min-content, max-content);
+            grid-auto-rows: minmax(min-content, max-content) minmax(min-content, max-content) minmax(min-content, max-content) minmax(0, max-content);
         }
 
         .admin{
@@ -197,9 +197,6 @@
         <div id="chat-page" class="col">
             <div class="chat-container">
                 <div class="chat-messages" id="chat-messages-id">
-                    <div id="connecting" style="display:none">
-                        Connecting...
-                    </div>
                     <ul th:each="conv : ${conversation}">
                         <li th:switch="${conv.message.fileId != null}" class="list-group-item list-message">
                             <span class="username-span" th:text="${conv.username}"></span>
@@ -211,6 +208,9 @@
                     <ul id="messageArea">
 
                     </ul>
+                    <div id="connecting" style="display:none">
+                        Connecting...
+                    </div>
                 </div>
                 <div class="messageFooter">
                     <form id="messageForm" name="messageForm" style="display:none">
@@ -358,11 +358,6 @@
     var username = null;
     var dateTime = null;
 
-    var colors = [
-        '#2196F3', '#32c787', '#00BCD4', '#ff5652',
-        '#ffc107', '#ff85af', '#FF9800', '#39bbb0'
-    ];
-
     uploadBtn.addEventListener('click', showUploadContainer, true);
 
     function showUploadContainer(event) {
@@ -436,7 +431,6 @@
 
 
     function onError(error) {
-        gotoBottom("chat-messages-id");
         connectingElement.textContent = 'Could not connect to WebSocket server. Please refresh this page to try again!';
         connectingElement.style.color = 'red';
         connectingElement.style.display = "block";
