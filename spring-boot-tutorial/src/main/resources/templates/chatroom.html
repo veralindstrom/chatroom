@@ -14,7 +14,7 @@
         }
 
         .chatroom{
-            overflow: hidden;
+            /*overflow: hidden;*/
             display: flex;
             flex-direction: column;
             height: 100vh;
@@ -148,7 +148,7 @@
         }
     </style>
 </head>
-<body onload="connect();">
+<body>
 <!--body-->
 <div class="chatroom">
 
@@ -161,12 +161,12 @@
         <h1 style="display:none" class="title" id="favoriteString" th:text="${favString}"></h1>
 
         <div style="display:none" id="userId" th:text="${user.userId}"></div>
-        <form style="display:none" id="usernameForm" name="usernameForm">
+        <form id="usernameForm" name="usernameForm">
             <div class="form-group">
                 <!--div class="form-control" th:text="${user.username}"></div-->
-                <input type="text" id="name" th:value="${user.username}" autocomplete="on" class="form-control" disabled/>
+                <input type="text" id="name" th:value="${user.username}" autocomplete="on" class="form-control"/>
             </div>
-            <div class="form-group" id="startForm" style="display:none">
+            <div class="form-group" id="startForm">
                 <button type="submit" class="accent username-submit">Start chatting</button>
             </div>
         </form>
@@ -330,7 +330,7 @@ singleUploadForm.addEventListener('submit', function(event){
 }, true);
 
 /* START OF CHAT CODE */
-//var usernameForm = document.querySelector('#usernameForm');
+var usernameForm = document.querySelector('#usernameForm');
 
 var messageForm = document.querySelector('#messageForm');
 var messageInput = document.querySelector('#message');
@@ -493,9 +493,7 @@ function onMessageReceived(payload) {
         leaveCounts = leaveCounts + 1;
 
     } else { // message.type: CHAT or other
-        if(chatCounts !== 0) {
-            messageElement = null;
-        }else {
+
             joinCounts = 0;
             leaveCounts = 0;
             messageElement.classList.add('chat-message');
@@ -508,9 +506,8 @@ function onMessageReceived(payload) {
             usernameElement.appendChild(usernameText);
             messageElement.appendChild(usernameElement);
             chatCounts = chatCounts + 1;
-        }
     }
-    if(messageElement !== null) {
+    //if(messageElement !== null) {
         const textElement = document.createElement('p');
         if(message.type === 'FILE'){
             textElement.innerHTML = message.content;
@@ -521,7 +518,7 @@ function onMessageReceived(payload) {
 
         messageElement.appendChild(textElement);
         messageArea.appendChild(messageElement);
-    }
+    //}
     gotoBottom("chat-messages-id");
 }
 
@@ -568,12 +565,12 @@ function onFavoriteStatusChange(payload) {
 }
 
 
-//usernameForm.addEventListener('submit', connect, true)
+usernameForm.addEventListener('submit', connect, true)
 messageForm.addEventListener('submit', sendMessage, true)
 backToHome.addEventListener('click', leave, true)
 favoriteForm.addEventListener('submit', makeFavorite, true)
 removeFavoriteForm.addEventListener('submit', removeFavorite, true)
-document.addEventListener('DOMContentLoaded', connect, false);
+//document.addEventListener('DOMContentLoaded', connect, false);
 </script>
 </body>
 </html>

@@ -42,6 +42,7 @@ public class UserController {
         if(new BCryptPasswordEncoder().matches(password, tempUser.getPassword())){
             user = tempUser;
         }
+
         if (user != null) {
             setCookie(response, user.getUserId().toString());
             model.addAttribute("user", user);
