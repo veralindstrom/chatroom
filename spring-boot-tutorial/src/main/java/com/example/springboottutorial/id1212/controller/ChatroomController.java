@@ -350,7 +350,7 @@ public class ChatroomController {
                 }
                 if (emailsCounted != number) {
                     if (count != 0){ // If more than one email added
-                        String missMatch = "You entered " + number + "users to add, but entered " + emailsCounted + " many emails.";
+                        String missMatch = "You entered " + number + " users to add, but entered " + emailsCounted + " emails";
                         String[] uniqueEmails = emailInput.split(", ", number); // check first for number of , to know limit value
                         splitEmailsPrivateChatroom(model, uniqueEmails, chatroom);
                         model.addAttribute("missmatch", missMatch);
