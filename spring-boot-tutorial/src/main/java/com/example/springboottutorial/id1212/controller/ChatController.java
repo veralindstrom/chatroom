@@ -53,7 +53,7 @@ public class ChatController {
         Integer userId = chatMessage.getUserId(); // if username is not unique
         String fileId = chatMessage.getFileId();
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         Date newDate = formatter.parse(date);
 
         Message message = new Message();
