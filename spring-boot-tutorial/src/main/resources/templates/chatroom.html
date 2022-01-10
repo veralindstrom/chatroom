@@ -181,19 +181,26 @@
             </ul>
         </div>
         <div class="favorite">
-            <!--div th:if="${favorite}" id="favoriteChecked" class="chat-header col form-group" style="text-align: right; display:block;">
-                <div class="accent username-submit" style="display: none;">Favorite</div>
-            </div-->
-            <form id="favoriteForm" class="chat-header col" style="text-align: right; display:none;">
-                <div id="favoriteButton" class="form-group" style="display:block;">
+            <form th:if="${favorite}" th:action="@{/chatroom/{id}/change-favorite(id=${chatroom.id})}" method="POST" class="chat-header col form-group" style="text-align: right; display:block;">
+                <div class="form-group" style="display:block;">
+                    <button type="submit" class="star accent username-submit"><img src="https://img.icons8.com/fluency/48/000000/star.png"/></button>
+                </div>
+            </form>
+            <form th:unless="${favorite}" th:action="@{/chatroom/{id}/change-favorite(id=${chatroom.id})}" method="POST" class="chat-header col form-group" style="text-align: right; display:block;">
+                <div class="form-group" style="display:block;">
                     <button type="submit" class="star accent username-submit"><img src="https://img.icons8.com/color/48/000000/star--v1.png"/></button>
                 </div>
             </form>
-            <form id="removeFavoriteForm" class="chat-header col" style="text-align: right; display:none;">
+            <!--form id="favoriteForm" class="chat-header col" style="text-align: right; display:none;">
                 <div id="removeFavoriteButton" class="form-group" style="display:block;">
                     <button type="submit" class=" star accent username-submit"><img src="https://img.icons8.com/fluency/48/000000/star.png"/></button>
                 </div>
             </form>
+            <form id="removeFavoriteForm" class="chat-header col" style="text-align: right; display:none;">
+                <div id="removeFavoriteButton" class="form-group" style="display:block;">
+                    <button type="submit" class=" star accent username-submit"><img src="https://img.icons8.com/fluency/48/000000/star--v1.png"/></button>
+                </div>
+            </form-->
         </div>
 </div>
 
@@ -352,9 +359,9 @@ var backToHome = document.querySelector('#back-to-home-btn');
 var uploadFrom = document.querySelector('#upload-container');
 var uploadBtn = document.querySelector('#uploadBtn');
 
-var favoriteForm = document.querySelector('#favoriteForm');
-var removeFavoriteForm = document.querySelector('#removeFavoriteForm');// for when already favorite
-var favoriteChecked = document.querySelector('#favoriteChecked');
+//var favoriteForm = document.querySelector('#favoriteForm');
+//var removeFavoriteForm = document.querySelector('#removeFavoriteForm');// for when already favorite
+//var favoriteChecked = document.querySelector('#favoriteChecked');
 //var favoriteButton = document.querySelector('#favoriteButton');
 //var removeFavoriteButton = document.querySelector('#removeFavoriteButton');
 
@@ -394,14 +401,14 @@ function connect(event) {
         stompClient.connect({}, onConnected, onError);
     }
 
-    // Tell favorite starting status to the server
+  /*  // Tell favorite starting status to the server
     var favoriteString = document.querySelector('#favoriteString').textContent;
     if (favoriteString === "true"){
         removeFavoriteForm.style.display = "block";
     }
     if (favoriteString === "false"){
         favoriteForm.style.display = "block";
-    }
+    }*/
 
     event.preventDefault();
 }
@@ -409,7 +416,7 @@ function connect(event) {
 function onConnected() {
     // Subscribe to the Public Topic
     stompClient.subscribe('/topic/public', onMessageReceived);
-    stompClient.subscribe('/topic/favorite', onFavoriteStatusChange);
+    //stompClient.subscribe('/topic/favorite', onFavoriteStatusChange);
     // Tell your username to the server
     stompClient.send("/app/chat.addUser",
         {},
@@ -535,7 +542,7 @@ function onMessageReceived(payload) {
     }
     gotoBottom("chat-messages-id");
 }
-
+/*
 function makeFavorite(event) {
     //stompClient.subscribe('/topic/favorite', onFavoriteStatusChange);
     var favorite = 'Favorite';
@@ -548,8 +555,8 @@ function removeFavorite(event) {
     var favorite = 'RemoveFavorite';
     favoriteChange(favorite);
     event.preventDefault();
-}
-
+}*/
+/*
 function favoriteChange(favorite) {
     var chatroomId = document.querySelector('#chatId').textContent;
     var userId = document.querySelector('#userId').textContent;
@@ -562,8 +569,8 @@ function favoriteChange(favorite) {
         };
         stompClient.send("/app/chat.favorite", {}, JSON.stringify(chatMessage));
     }
-}
-
+}*/
+/*
 function onFavoriteStatusChange(payload) {
     var message = JSON.parse(payload.body);
     // var messageElement = document.createElement('button'); // create button
@@ -576,14 +583,14 @@ function onFavoriteStatusChange(payload) {
         removeFavoriteForm.style.display = "none";
         favoriteChecked.style.display = "none";
     }
-}
+}*/
 
 
 //usernameForm.addEventListener('submit', connect, true)
 messageForm.addEventListener('submit', sendMessage, true)
 backToHome.addEventListener('click', leave, true)
-favoriteForm.addEventListener('submit', makeFavorite, true)
-removeFavoriteForm.addEventListener('submit', removeFavorite, true)
+//favoriteForm.addEventListener('submit', makeFavorite, true)
+//removeFavoriteForm.addEventListener('submit', removeFavorite, true)
 document.addEventListener('DOMContentLoaded', connect, false);
 </script>
 </body>

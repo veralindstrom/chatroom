@@ -94,16 +94,14 @@ public class ChatroomController {
 
 
                 Integer favoriteStatus = chatroomUserRepository.getFavoriteStatusByUserIdChatroomId(userId, id);
-                String favoriteString = "false";
-                if (favoriteStatus != null) { //
-                    if (favoriteStatus.equals(1)) {
-                        favoriteString = "true";
-                    }
-                } else {
-                    favoriteStatus = 0;
+               // String favoriteString = "false";
+                if (favoriteStatus.equals(1)) {
+                    //favoriteString = "true";
+                    model.addAttribute("favorite", favoriteStatus);
                 }
-                model.addAttribute("favString", favoriteString); // must have for js code, not work with bool or number
-                model.addAttribute("favorite", favoriteStatus);
+
+                //model.addAttribute("favString", favoriteString); // must have for js code, not work with bool or number
+                //model.addAttribute("favorite", favoriteStatus);
 
                 Integer roleId = chatroomUser.getRoleId();
                 if (roleId != null) {
@@ -493,6 +491,32 @@ public class ChatroomController {
                     chatroomCategoryRepository.save(chatroomCategory);
                 }
             }
+            model.addAttribute("chatroom", chatroom);
+            model.addAttribute("user", user);
+
+            return "redirect:/chatroom/{id}";
+        } else {
+            String message = "You are logged out";
+            model.addAttribute("message", message);
+        }
+        return "index";
+    }
+
+    @PostMapping("/chatroom/{id}/change-favorite")
+    public String changeFavorite(Model model, @PathVariable Integer id) { // Does not work when Role role as should
+        if (user != null) {
+            Integer currentStatus = chatroomUserRepository.getFavoriteStatusByUserIdChatroomId(user.getUserId(), id);
+            if(currentStatus.equals(1)) { // remove favorite
+                Integer falseStatus = 0;
+                chatroomUserRepository.updateChatroomUserWithFavoriteStatus(falseStatus, id, user.getUserId());
+            }
+            if (currentStatus.equals(0)){ // make favorite
+                Integer trueStatus = 1;
+                chatroomUserRepository.updateChatroomUserWithFavoriteStatus(trueStatus, id, user.getUserId());
+                model.addAttribute("favorite", trueStatus);
+            }
+
+            Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
             model.addAttribute("chatroom", chatroom);
             model.addAttribute("user", user);
 
