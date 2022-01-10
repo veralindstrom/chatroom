@@ -175,15 +175,15 @@
             </div>
         </form>
     </div>
-        <div class="category-list">
+        <div th:if="${categories}" class="category-list">
             <ul class="list-group list-group-horizontal">
                 <li th:each="category: ${categories}" class="list-group-item" id="category-list-item" th:text="${'#' + category.category}"></li>
             </ul>
         </div>
         <div class="favorite">
-            <div th:if="${favorite}" id="favoriteChecked" class="chat-header col form-group" style="text-align: right; display:block;">
+            <!--div th:if="${favorite}" id="favoriteChecked" class="chat-header col form-group" style="text-align: right; display:block;">
                 <div class="accent username-submit" style="display: none;">Favorite</div>
-            </div>
+            </div-->
             <form id="favoriteForm" class="chat-header col" style="text-align: right; display:none;">
                 <div id="favoriteButton" class="form-group" style="display:block;">
                     <button type="submit" class="star accent username-submit"><img src="https://img.icons8.com/color/48/000000/star--v1.png"/></button>
@@ -262,6 +262,13 @@
                 <form class="create-role-form" th:action="@{/chatroom/{id}/create-role(id=${chatroom.id})}" method="GET" style="max-width: 600px;">
                     <label class="col-form-label"> Want a role? </label>
                     <button type="submit" class="btn role-btn">Create</button>
+                </form>
+            </div>
+            <div th:if="${admin}">
+                <form class="create-role-form" th:action="@{/chatroom/{id}/change-chatroom-category(id=${chatroom.id})}"  method="GET" style="max-width: 600px;">
+                    <label class="col-form-label"> Change categories? </label>
+                    <button type="submit" class="btn role-btn">Change</button>
+                    <div th:if="${notremove}" class="col-form-label" th:text="${notremove}"></div>
                 </form>
             </div>
 
