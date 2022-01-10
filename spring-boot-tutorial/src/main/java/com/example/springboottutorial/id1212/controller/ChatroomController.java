@@ -233,28 +233,34 @@ public class ChatroomController {
 
     @GetMapping("/leave-chatroom/{id}")
     public String leaveChatroom(@PathVariable Integer id, Model model) {
-        ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(user.getUserId(), id);
+        if(user != null) {
+            ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(user.getUserId(), id);
 
-        chatroomUserRepository.delete(chatroomUser);
-        Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
-        ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByChatroomId(id);
-        if (chatroomUser.getAdmin() == 1) {
-            if (chatroomCategories.size() > 0) {
-                for (ChatroomCategory cc : chatroomCategories) {
-                    chatroomCategoryRepository.delete(cc);
+            chatroomUserRepository.delete(chatroomUser);
+            Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
+            ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByChatroomId(id);
+            if (chatroomUser.getAdmin() == 1) {
+                if (chatroomCategories.size() > 0) {
+                    for (ChatroomCategory cc : chatroomCategories) {
+                        chatroomCategoryRepository.delete(cc);
+                    }
                 }
-            }
-            /*if chatroom had messages those needs to be removed too */
-            ArrayList<Integer> messageIdsInChatroom = messageRepository.getAllMessageIdsByChatroomId(id);
-            if (messageIdsInChatroom.size() > 0) {
-                for (Integer mId : messageIdsInChatroom) {
-                    Message m = messageRepository.findMessageByMessageId(mId);
-                    messageRepository.delete(m);
+                /*if chatroom had messages those needs to be removed too */
+                ArrayList<Integer> messageIdsInChatroom = messageRepository.getAllMessageIdsByChatroomId(id);
+                if (messageIdsInChatroom.size() > 0) {
+                    for (Integer mId : messageIdsInChatroom) {
+                        Message m = messageRepository.findMessageByMessageId(mId);
+                        messageRepository.delete(m);
+                    }
                 }
+                chatroomRepository.delete(chatroom);
             }
-            chatroomRepository.delete(chatroom);
+            return "leave-chatroom";
+        } else {
+            String message = "You are logged out";
+            model.addAttribute("message", message);
         }
-        return "leave-chatroom";
+        return "index";
     }
 
     @GetMapping("/create-chatroom")

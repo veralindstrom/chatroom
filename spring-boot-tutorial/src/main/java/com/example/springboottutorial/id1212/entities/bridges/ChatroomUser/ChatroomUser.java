@@ -1,7 +1,5 @@
 package com.example.springboottutorial.id1212.entities.bridges.ChatroomUser;
 
-import com.example.springboottutorial.id1212.entities.bridges.ChatroomCategory.ChatroomCategoryId;
-
 import javax.persistence.*;
 
 @Entity

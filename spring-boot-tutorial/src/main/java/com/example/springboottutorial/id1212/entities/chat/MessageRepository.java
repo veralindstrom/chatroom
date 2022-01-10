@@ -8,9 +8,6 @@ import java.util.Date;
 
 public interface MessageRepository extends CrudRepository<Message, Integer> {
     Message findMessageByMessageId(Integer messageId);
-    Message findMessageByUserId(Integer userId);
-    Message findMessageByDate(Date date);
-    Message findMessageByChatroomId(Integer chatroomId);
     ArrayList<Message> findMessagesByChatroomIdAndFileIdIsNotNull(Integer chatroomId);
 
 

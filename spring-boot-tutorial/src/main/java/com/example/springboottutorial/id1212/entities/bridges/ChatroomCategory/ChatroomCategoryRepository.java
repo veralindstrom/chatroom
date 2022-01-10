@@ -11,7 +11,4 @@ public interface ChatroomCategoryRepository extends CrudRepository<ChatroomCateg
     ArrayList<ChatroomCategory> findChatroomCategoriesByCategoryId(Integer categoryId);
     ArrayList<ChatroomCategory> findChatroomCategoriesByChatroomId(Integer chatroomId);
 
-    @Query("SELECT c.chatroomId FROM ChatroomCategory c WHERE c.categoryId = ?1")
-    ArrayList<Integer> getAllChatroomIdWithCategoryId(Integer categoryId);
-
 }

@@ -110,11 +110,25 @@ public class UserController {
     }
 
     @PostMapping("/signup-process")
-    public String processRegister(User user) {
-        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-        userRepository.save(user);
-
-        return "signup-success";
+    public String processRegister(Model model, User user) {
+        if (user != null) {
+            String email = user.getEmail();
+            User existing = userRepository.findUserByEmail(email);
+            if (existing != null) {
+                String exist = "E-mail is already registered";
+                model.addAttribute("exist", exist);
+                return "signup";
+            } else {
+                user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+                userRepository.save(user);
+                return "signup-success";
+            }
+        }
+        else {
+            String message = "You are logged out";
+            model.addAttribute("message", message);
+        }
+        return "index";
     }
 
     @GetMapping("/logout")
