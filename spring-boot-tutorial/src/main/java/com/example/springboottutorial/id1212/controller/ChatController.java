@@ -4,10 +4,7 @@ import com.example.springboottutorial.id1212.chat.ChatMessage;
 import com.example.springboottutorial.id1212.entities.bridges.DBFileUser.DBFileUser;
 import com.example.springboottutorial.id1212.entities.bridges.DBFileUser.DBFileUserRepository;
 import com.example.springboottutorial.id1212.entities.file.DBFileRepository;
-import com.example.springboottutorial.id1212.entities.user.User;
 import com.example.springboottutorial.id1212.entities.user.UserRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -16,12 +13,11 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser.ChatroomUserRepository;
-import com.example.springboottutorial.id1212.entities.bridges.ChatroomUser.ChatroomUser;
+
 
 import com.example.springboottutorial.id1212.entities.chat.MessageRepository;
 import com.example.springboottutorial.id1212.entities.chat.Message;
 
-import javax.transaction.Transactional;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -39,10 +35,6 @@ public class ChatController {
     @Autowired
     private UserRepository userRepository;
 
-  /*  public ChatController(MessageRepository messageRepository) {
-        this.messageRepository = messageRepository;
-        this.chatroomUserRepository = chatroomUserRepository;
-    }*/
 
     @MessageMapping("/chat.sendMessage")
     @SendTo("/topic/public")
@@ -92,34 +84,5 @@ public class ChatController {
         headerAccessor.getSessionAttributes().remove("username", chatMessage.getSender());
         return chatMessage;
     }
-
-   /* @MessageMapping("/chat.favorite")
-    @SendTo("/topic/favorite")
-    public ChatMessage favoriteChatroom(@Payload ChatMessage chatMessage) {
-        Integer chatroomId = chatMessage.getChatroomId();
-        Integer userId = chatMessage.getUserId();
-        String content = chatMessage.getContent();
-
-        if(content.equals("Favorite")) {
-            Integer trueStatus = 1;
-            chatroomUserRepository.updateChatroomUserWithFavoriteStatus(trueStatus, chatroomId, userId);
-        }
-        if(content.equals("RemoveFavorite")) {
-            Integer falseStatus = 0;
-            chatroomUserRepository.updateChatroomUserWithFavoriteStatus(falseStatus, chatroomId, userId);
-        }
-        else {
-            Integer currentStatus = chatroomUserRepository.getFavoriteStatusByUserIdChatroomId(userId, chatroomId);
-            if(currentStatus.equals(1)) {
-                chatMessage.setContent("Favorite");
-            }
-            if (currentStatus.equals(0)) {
-                chatMessage.setContent("RemoveFavorite");
-            }
-
-        }
-
-        return chatMessage;
-    }*/
 
 }

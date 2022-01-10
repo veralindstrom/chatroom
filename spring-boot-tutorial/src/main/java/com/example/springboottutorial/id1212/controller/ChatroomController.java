@@ -48,11 +48,6 @@ public class ChatroomController {
         }
     }
 
- /*   @GetMapping("/test-chat-functionality")
-    public String showTestChat() {
-        return "test-chat-functionality";
-    }*/
-
     @GetMapping("/chatroom/{id}")
     public String showChatroom(@PathVariable Integer id, Model model, @CookieValue(value = "userId", required = false) String userIdFromCookie) {
         readCookie(userIdFromCookie);
@@ -60,7 +55,6 @@ public class ChatroomController {
             Integer userId = user.getUserId();
             Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
             ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(userId, id);
-            //Chatroom chatroomWithUser = chatroomRepository.findChatRoomByChatroomId(chatroomUser.getChatroomId());
             ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByChatroomId(id);
             ArrayList<Category> categories = new ArrayList<>();
 
@@ -94,14 +88,9 @@ public class ChatroomController {
 
 
                 Integer favoriteStatus = chatroomUserRepository.getFavoriteStatusByUserIdChatroomId(userId, id);
-               // String favoriteString = "false";
                 if (favoriteStatus.equals(1)) {
-                    //favoriteString = "true";
                     model.addAttribute("favorite", favoriteStatus);
                 }
-
-                //model.addAttribute("favString", favoriteString); // must have for js code, not work with bool or number
-                //model.addAttribute("favorite", favoriteStatus);
 
                 Integer roleId = chatroomUser.getRoleId();
                 if (roleId != null) {
@@ -115,7 +104,6 @@ public class ChatroomController {
                     model.addAttribute("admin", admin);
                 }
 
-                //model.addAttribute("chatroom", chatroomWithUser);
                 Chatroom cr = chatroomRepository.findChatRoomByChatroomId(id);
                 model.addAttribute("user", user);
                 model.addAttribute("chatroom", cr);
@@ -173,8 +161,6 @@ public class ChatroomController {
 
     private void chatroom(Model model, Chatroom chat) {
         Integer chatId = chat.getId();
-        //Integer userId = user.getUserId();
-        //ArrayList<ChatroomUser> chatroomUserList = chatroomUserRepository.findChatroomUsersByChatroomId(chatId);
         ArrayList<Integer> userIdList = chatroomUserRepository.getAllUserIdsByChatroomId(chatId);
         ArrayList<String> userNames = new ArrayList<String>();
         for (Integer id : userIdList) {
@@ -231,8 +217,6 @@ public class ChatroomController {
             Integer roleId = chatRole.getRoleId();
             Integer userId = user.getUserId();
 
-            //ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(user.getUserId(), id);
-
             chatroomUserRepository.updateChatroomUserWithRoleId(roleId, id, userId);
 
             Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
@@ -250,16 +234,11 @@ public class ChatroomController {
     @GetMapping("/leave-chatroom/{id}")
     public String leaveChatroom(@PathVariable Integer id, Model model) {
         ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(user.getUserId(), id);
-       /* Integer roleId = chatroomUserRepository.getRoleIdByUserIdChatroomId(user.getUserId(), id);
-        Role role = roleRepository.findRoleByRoleId(roleId);
-        roleRepository.delete(role);*/
 
         chatroomUserRepository.delete(chatroomUser);
-        //System.out.println("AFTER DELETE CHATROOM USER! ----------------------------------------");
         Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
         ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByChatroomId(id);
-        if (chatroomUser.getAdmin() == 1) { // TRUE
-            /*if chatroom had categories the bridge needs to be removed first*/
+        if (chatroomUser.getAdmin() == 1) {
             if (chatroomCategories.size() > 0) {
                 for (ChatroomCategory cc : chatroomCategories) {
                     chatroomCategoryRepository.delete(cc);
@@ -273,7 +252,6 @@ public class ChatroomController {
                     messageRepository.delete(m);
                 }
             }
-            /*deleting chatroom*/
             chatroomRepository.delete(chatroom);
         }
         return "leave-chatroom";
@@ -405,7 +383,6 @@ public class ChatroomController {
     @PostMapping("/remove-category-process")
     public String processRemoveCategory(Model model, @RequestParam(required = false) ArrayList<Integer> categoryId) { // Does not work when Role role as should
         if (user != null) {
-            //ArrayList<String> cannotRemove = new ArrayList<>();
             if (categoryId != null) {
                 for (Integer id : categoryId) {
                     ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByCategoryId(id);
@@ -420,10 +397,6 @@ public class ChatroomController {
                     }
                 }
             }
-           /* if (!cannotRemove.isEmpty()) {
-                String notremove = "Category " + cannotRemove + " cannot be removed when used in chatrooms.";
-                model.addAttribute("notremove", notremove);
-            }*/
 
             Chatroom chatroom = new Chatroom();
             ArrayList<Category> categories = (ArrayList<Category>) categoryRepository.findAll();
