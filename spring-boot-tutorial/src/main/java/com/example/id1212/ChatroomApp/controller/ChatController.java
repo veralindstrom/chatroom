@@ -27,13 +27,7 @@ public class ChatController {
     @Autowired
     private MessageRepository messageRepository;
     @Autowired
-    private ChatroomUserRepository chatroomUserRepository;
-    @Autowired
-    private DBFileRepository dbFileRepository;
-    @Autowired
     private DBFileUserRepository dbFileUserRepository;
-    @Autowired
-    private UserRepository userRepository;
 
 
     @MessageMapping("/chat.sendMessage")
@@ -45,7 +39,7 @@ public class ChatController {
         Integer userId = chatMessage.getUserId(); // if username is not unique
         String fileId = chatMessage.getFileId();
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date newDate = formatter.parse(date);
 
         Message message = new Message();

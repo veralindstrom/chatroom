@@ -236,6 +236,10 @@ public class ChatroomController {
         if(user != null) {
             ChatroomUser chatroomUser = chatroomUserRepository.findChatroomUserByUserIdAndChatroomId(user.getUserId(), id);
 
+        /*    Integer roleId = chatroomUserRepository.getRoleIdByUserIdChatroomId(user.getUserId(), id);
+            Role role = roleRepository.findRoleByRoleId(roleId);
+            roleRepository.delete(role);*/
+
             chatroomUserRepository.delete(chatroomUser);
             Chatroom chatroom = chatroomRepository.findChatRoomByChatroomId(id);
             ArrayList<ChatroomCategory> chatroomCategories = chatroomCategoryRepository.findChatroomCategoriesByChatroomId(id);
